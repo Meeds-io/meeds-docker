@@ -29,7 +29,7 @@ ARG DOWNLOAD_URL
 # this allow to specifiy a user to download a protected binary
 ARG DOWNLOAD_USER
 # allow to override the list of addons to package by default
-ARG ADDONS="exo-jdbc-driver-mysql:1.4.1"
+ARG ADDONS=""
 # Default base directory on the plf archive
 ARG ARCHIVE_BASE_DIR=meeds-community-${MEEDS_VERSION}
 ARG ARCHIVE_DOWNLOAD_PATH=/srv/downloads/meeds-${MEEDS_VERSION}.zip
@@ -96,6 +96,7 @@ USER ${MEEDS_USER}
 EXPOSE 8080
 VOLUME ["/srv/meeds"]
 
+# INSTALLING Meeds addons
 RUN for a in ${ADDONS}; do echo "Installing addon $a"; /opt/meeds/addon install $a; done
 
 WORKDIR ${MEEDS_LOG_DIR}

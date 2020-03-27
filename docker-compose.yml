@@ -15,9 +15,7 @@ services:
     environment:
       MEEDS_PROXY_VHOST: localhost
       MEEDS_PROXY_PORT: 80
-      MEEDS_DB_HOST: mysql
       MEEDS_PROXY_SSL: "false"
-      MEEDS_DB_TYPE: mysql
       MEEDS_DB_NAME: meeds
       MEEDS_DB_USER: meeds
       MEEDS_DB_PASSWORD: my-secret-pw
@@ -26,18 +24,6 @@ services:
     volumes:
       - meeds_data:/srv/meeds
       - meeds_logs:/var/log/meeds
-    depends_on:
-      - mysql
-  mysql:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: my-super-secret-pw
-      MYSQL_DATABASE: meeds
-      MYSQL_USER: meeds
-      MYSQL_PASSWORD: my-secret-pw
-    volumes:
-      - mysql_data:/var/lib/mysql
 volumes:
   meeds_data:
   meeds_logs:
-  mysql_data:

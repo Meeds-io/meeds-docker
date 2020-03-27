@@ -63,19 +63,10 @@ case "${MEEDS_DB_TYPE}" in
     echo "################################################################################"
     sleep 2
     ;;
-  mysql)
-    [ -z "${MEEDS_DB_NAME}" ] && MEEDS_DB_NAME="meeds"
-    [ -z "${MEEDS_DB_USER}" ] && MEEDS_DB_USER="meeds"
-    [ -z "${MEEDS_DB_PASSWORD}" ] && { echo "ERROR: you must provide a database password with MEEDS_DB_PASSWORD environment variable"; exit 1;}
-    [ -z "${MEEDS_DB_HOST}" ] && MEEDS_DB_HOST="mysql"
-    [ -z "${MEEDS_DB_PORT}" ] && MEEDS_DB_PORT="3306"
-    [ -z "${MEEDS_DB_MYSQL_USE_SSL}" ] && MEEDS_DB_MYSQL_USE_SSL="false"
-    ;;
   *)
     echo "ERROR: you must provide a supported database type with MEEDS_DB_TYPE environment variable (current value is '${MEEDS_DB_TYPE}')"
     echo "ERROR: supported database types are :"
     echo "ERROR: HSQLDB     (MEEDS_DB_TYPE = hsqldb) (default)"
-    echo "ERROR: MySQL      (MEEDS_DB_TYPE = mysql)"
     exit 1;;
 esac
 [ -z "${MEEDS_DB_POOL_IDM_INIT_SIZE}" ] && MEEDS_DB_POOL_IDM_INIT_SIZE="5"
@@ -156,11 +147,6 @@ else
   case "${MEEDS_DB_TYPE}" in
     hsqldb)
       cat /opt/meeds/conf/server-hsqldb.xml > /opt/meeds/conf/server.xml
-      ;;
-    mysql)
-      cat /opt/meeds/conf/server-mysql.xml > /opt/meeds/conf/server.xml
-      replace_in_file /opt/meeds/conf/server.xml "jdbc:mysql://localhost:3306/plf?autoReconnect=true" "jdbc:mysql://${MEEDS_DB_HOST}:${MEEDS_DB_PORT}/${MEEDS_DB_NAME}?autoReconnect=true\&amp;useSSL=${MEEDS_DB_MYSQL_USE_SSL}"
-      replace_in_file /opt/meeds/conf/server.xml 'username="plf" password="plf"' 'username="'${MEEDS_DB_USER}'" password="'${MEEDS_DB_PASSWORD}'"'
       ;;
     *) echo "ERROR: you must provide a supported database type with MEEDS_DB_TYPE environment variable (current value is '${MEEDS_DB_TYPE}')";
       exit 1;;
@@ -479,18 +465,6 @@ fi
 
 # Change the device for antropy generation
 CATALINA_OPTS="${CATALINA_OPTS:-} -Djava.security.egd=file:/dev/./urandom"
-
-# Wait for database availability
-case "${MEEDS_DB_TYPE}" in
-  mysql)
-    echo "Waiting for database ${MEEDS_DB_TYPE} availability at ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} ..."
-    wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -s -t ${MEEDS_DB_TIMEOUT}
-    if [ $? != 0 ]; then
-      echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! eXo startup aborted ..."
-      exit 1
-    fi
-    ;;
-esac
 
 # Wait for elasticsearch availability (if external)
 if [ "${MEEDS_ES_EMBEDDED}" != "true" ]; then
