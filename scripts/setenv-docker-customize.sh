@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+﻿#!/bin/bash -eu
 # -----------------------------------------------------------------------------
 #
 # Settings customization
@@ -317,7 +317,7 @@ else
     add_in_meeds_configuration "es.path.data=${MEEDS_ES_EMBEDDED_DATA}"
   else
     # Remove eXo ES Embedded add-on
-    MEEDS_ADDONS_REMOVE_LIST="${MEEDS_ADDONS_REMOVE_LIST:-},exo-es-embedded"
+    MEEDS_ADDONS_REMOVE_LIST="${MEEDS_ADDONS_REMOVE_LIST:-},meeds-es-embedded"
   fi
 
   add_in_meeds_configuration "exo.es.search.server.url=${MEEDS_ES_URL}"
