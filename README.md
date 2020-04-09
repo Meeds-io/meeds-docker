@@ -12,7 +12,7 @@ The prerequisites are :
 The most basic way to start Meeds Server for *evaluation* purpose is to execute
 
 ```bash
-docker run -v meeds_data:/srv/meeds -p 8080:8080 meeds-io/meeds
+docker run -v meeds_data:/srv/meeds -p 8080:8080 meedsio/meeds
 ```
 
 and then waiting the log line which say that the server is started.
@@ -162,7 +162,7 @@ You have to specify the following environment variables to configure Meeds Serve
 docker run -d \
   -p 8080:8080 \
   -e MEEDS_PROXY_VHOST="my.public-facing-hostname.org" \
-  meeds-io/meeds
+  meedsio/meeds
 ```
 
 You can also use Docker Compose (see the provided `docker-compose.yml` file as an example).
@@ -181,7 +181,7 @@ To install add-ons in the container, provide a commas separated list of add-ons 
 docker run -d \
   -p 8080:8080 \
   -e MEEDS_ADDONS_LIST="meeds-wallet:2.0.x-SNAPSHOT" \
-  meeds-io/meeds
+  meedsio/meeds
 ```
 
 INFO: the provided add-ons list will be installed in the container during the container creation.
@@ -210,7 +210,7 @@ All previously mentioned [environment variables](#configuration-options) can be 
 docker run -d \
   -p 8080:8080 \
   -e MEEDS_JVM_SIZE_MAX="8g" \
-  meeds-io/meeds
+  meedsio/meeds
 ```
 
 Some [eXo configuration properties](https://docs.exoplatform.org/PLF50/PLFAdminGuide.Configuration.Properties_reference.html) can also be defined in an `exo.properties` file. In this case, just create this file and bind mount it in the Docker container :
@@ -219,13 +219,15 @@ Some [eXo configuration properties](https://docs.exoplatform.org/PLF50/PLFAdminG
 docker run -d \
   -p 8080:8080 \
   -v /absolute/path/to/exo.properties:/etc/meeds/exo.properties:ro \
-  meeds-io/meeds
+  meedsio/meeds
 ```
 
 ## Image build
 
 The simplest way to build this image is to use default values :
 
-    docker build -t meeds-io/meeds .
+```bash
+    docker build -t meedsio/meeds .
+```
 
 This will produce an image with the current Meeds Server.
