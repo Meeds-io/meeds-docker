@@ -11,7 +11,7 @@ services:
     links:
       - meeds
   meeds:
-    image: meeds-io/meeds
+    image: meedsio/meeds
     environment:
       MEEDS_PROXY_VHOST: localhost
       MEEDS_PROXY_PORT: 80

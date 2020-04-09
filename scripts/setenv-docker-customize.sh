@@ -81,7 +81,7 @@ esac
 [ -z "${MEEDS_HTTP_THREAD_MIN}" ] && MEEDS_HTTP_THREAD_MIN="10"
 [ -z "${MEEDS_HTTP_THREAD_MAX}" ] && MEEDS_HTTP_THREAD_MAX="200"
 
-[ -z "${MEEDS_MAIL_FROM}" ] && MEEDS_MAIL_FROM="noreply@exoplatform.io"
+[ -z "${MEEDS_MAIL_FROM}" ] && MEEDS_MAIL_FROM="noreply@meeds.io"
 [ -z "${MEEDS_MAIL_SMTP_HOST}" ] && MEEDS_MAIL_SMTP_HOST="localhost"
 [ -z "${MEEDS_MAIL_SMTP_PORT}" ] && MEEDS_MAIL_SMTP_PORT="25"
 [ -z "${MEEDS_MAIL_SMTP_STARTTLS}" ] && MEEDS_MAIL_SMTP_STARTTLS="false"
