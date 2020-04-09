@@ -54,15 +54,6 @@ RUN mkdir -p ${MEEDS_DATA_DIR}   && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_D
     && mkdir -p ${MEEDS_TMP_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_TMP_DIR} \
     && mkdir -p ${MEEDS_LOG_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_LOG_DIR}
 
-# Install Meeds
-#  if [ ! -n "${DOWNLOAD_URL}" ]; then \
-#  echo "Building an image with eXo Platform version : ${MEEDS_VERSION}"; \
-#  MEEDS_VERSION_SHORT=$(echo ${MEEDS_VERSION} | awk -F "\." '{ print $1"."$2}'); \
-#  DOWNLOAD_URL="https://downloads.exoplatform.org/public/releases/platform/${MEEDS_VERSION_SHORT}/${MEEDS_VERSION}/platform-community-tomcat-${MEEDS_VERSION}.zip"; \
-#  fi && \
-#  curl ${PARAMS} -sS -L -o /srv/downloads/eXo-Platform-${MEEDS_VERSION}.zip ${DOWNLOAD_URL} && \
-
-
 RUN if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
   echo "Building an image with Meeds version : ${MEEDS_VERSION}" && \
   if [ ! -n "${DOWNLOAD_URL}" ]; then \
