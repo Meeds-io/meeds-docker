@@ -1,4 +1,4 @@
-﻿#!/bin/bash -eu
+#!/bin/bash -eu
 # -----------------------------------------------------------------------------
 #
 # Settings customization
@@ -81,7 +81,7 @@ esac
 [ -z "${MEEDS_HTTP_THREAD_MIN}" ] && MEEDS_HTTP_THREAD_MIN="10"
 [ -z "${MEEDS_HTTP_THREAD_MAX}" ] && MEEDS_HTTP_THREAD_MAX="200"
 
-[ -z "${MEEDS_MAIL_FROM}" ] && MEEDS_MAIL_FROM="noreply@meeds.io"
+[ -z "${MEEDS_MAIL_FROM}" ] && MEEDS_MAIL_FROM="noreply@example.com"
 [ -z "${MEEDS_MAIL_SMTP_HOST}" ] && MEEDS_MAIL_SMTP_HOST="localhost"
 [ -z "${MEEDS_MAIL_SMTP_PORT}" ] && MEEDS_MAIL_SMTP_PORT="25"
 [ -z "${MEEDS_MAIL_SMTP_STARTTLS}" ] && MEEDS_MAIL_SMTP_STARTTLS="false"
@@ -471,7 +471,7 @@ if [ "${MEEDS_ES_EMBEDDED}" != "true" ]; then
   echo "Waiting for external elastic search availability at ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} ..."
   wait-for ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} -s -t ${MEEDS_ES_TIMEOUT}
   if [ $? != 0 ]; then
-    echo "[ERROR] The external elastic search ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} was not available within ${MEEDS_ES_TIMEOUT}s ! eXo startup aborted ..."
+    echo "[ERROR] The external elastic search ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} was not available within ${MEEDS_ES_TIMEOUT}s ! Meeds startup aborted ..."
     exit 1
   fi
 fi
