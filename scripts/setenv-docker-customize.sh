@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+﻿#!/bin/bash -eu
 #
 # This file is part of the Meeds project (https://meeds.io/).
 # Copyright (C) 2020 Meeds Association
@@ -452,12 +452,9 @@ fi
 # LOG GC configuration
 # -----------------------------------------------------------------------------
 if [ "${MEEDS_JVM_LOG_GC_ENABLED}" = "true" ]; then
-  # -XX:+PrintGCDateStamps : print the absolute timestamp in the log statement (i.e. “2014-11-18T16:39:25.303-0800”)
-  # -XX:+PrintGCTimeStamps : print the time when the GC event started, relative to the JVM startup time (unit: seconds)
-  # -XX:+PrintGCDetails    : print the details of how much memory is reclaimed in each generation
-  MEEDS_JVM_LOG_GC_OPTS="-XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps"
+  MEEDS_JVM_LOG_GC_OPTS="-Xlog:gc=info:file=${MEEDS_LOG_DIR}/platform-gc.log:time"
   echo "Enabling eXo JVM GC logs with [${MEEDS_JVM_LOG_GC_OPTS}] options ..."
-  CATALINA_OPTS="${CATALINA_OPTS} ${MEEDS_JVM_LOG_GC_OPTS} -Xloggc:${MEEDS_LOG_DIR}/platform-gc.log"
+  CATALINA_OPTS="${CATALINA_OPTS} ${MEEDS_JVM_LOG_GC_OPTS}"
   # log rotation to backup previous log file (we don't use GC Log file rotation options because they are not suitable)
   # create the directory for older GC log file
   [ ! -d ${MEEDS_LOG_DIR}/platform-gc/ ] && mkdir ${MEEDS_LOG_DIR}/platform-gc/
