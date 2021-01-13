@@ -265,6 +265,7 @@ else
   # Mail configuration
   add_in_meeds_configuration "# Mail configuration"
   add_in_meeds_configuration "exo.email.smtp.from=${MEEDS_MAIL_FROM}"
+  add_in_meeds_configuration "gatein.email.smtp.from=${MEEDS_MAIL_FROM}"
   add_in_meeds_configuration "exo.email.smtp.host=${MEEDS_MAIL_SMTP_HOST}"
   add_in_meeds_configuration "exo.email.smtp.port=${MEEDS_MAIL_SMTP_PORT}"
   add_in_meeds_configuration "exo.email.smtp.starttls.enable=${MEEDS_MAIL_SMTP_STARTTLS}"
