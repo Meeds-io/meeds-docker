@@ -115,9 +115,7 @@ esac
 
 [ -z "${MEEDS_ACCESS_LOG_ENABLED}" ] && MEEDS_ACCESS_LOG_ENABLED="false"
 
-[ -z "${MEEDS_ES_EMBEDDED}" ] && MEEDS_ES_EMBEDDED="true"
 [ -z "${MEEDS_ES_TIMEOUT}" ] && MEEDS_ES_TIMEOUT="60"
-[ -z "${MEEDS_ES_EMBEDDED_DATA}" ] && MEEDS_ES_EMBEDDED_DATA="/srv/meeds/es"
 [ -z "${MEEDS_ES_SCHEME}" ] && MEEDS_ES_SCHEME="http"
 [ -z "${MEEDS_ES_HOST}" ] && MEEDS_ES_HOST="localhost"
 [ -z "${MEEDS_ES_PORT}" ] && MEEDS_ES_PORT="9200"
@@ -327,16 +325,7 @@ else
 
   # Elasticsearch configuration
   add_in_meeds_configuration "# Elasticsearch configuration"
-  add_in_meeds_configuration "exo.es.embedded.enabled=${MEEDS_ES_EMBEDDED}"
-  if [ "${MEEDS_ES_EMBEDDED}" = "true" ]; then
-    add_in_meeds_configuration "es.network.host=0.0.0.0" # we listen on all IPs inside the container
-    add_in_meeds_configuration "es.discovery.zen.ping.multicast.enabled=false"
-    add_in_meeds_configuration "es.http.port=${MEEDS_ES_PORT}"
-    add_in_meeds_configuration "es.path.data=${MEEDS_ES_EMBEDDED_DATA}"
-  else
-    # Remove eXo ES Embedded add-on
-    MEEDS_ADDONS_REMOVE_LIST="${MEEDS_ADDONS_REMOVE_LIST:-},meeds-es-embedded"
-  fi
+  add_in_meeds_configuration "exo.es.embedded.enabled=false"
 
   add_in_meeds_configuration "exo.es.search.server.url=${MEEDS_ES_URL}"
   add_in_meeds_configuration "exo.es.index.server.url=${MEEDS_ES_URL}"
@@ -481,14 +470,12 @@ fi
 # Change the device for antropy generation
 CATALINA_OPTS="${CATALINA_OPTS:-} -Djava.security.egd=file:/dev/./urandom"
 
-# Wait for elasticsearch availability (if external)
-if [ "${MEEDS_ES_EMBEDDED}" != "true" ]; then
-  echo "Waiting for external elastic search availability at ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} ..."
-  wait-for ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} -s -t ${MEEDS_ES_TIMEOUT}
-  if [ $? != 0 ]; then
-    echo "[ERROR] The external elastic search ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} was not available within ${MEEDS_ES_TIMEOUT}s ! Meeds startup aborted ..."
-    exit 1
-  fi
+# Wait for elasticsearch availability
+echo "Waiting for external elastic search availability at ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} ..."
+wait-for ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} -s -t ${MEEDS_ES_TIMEOUT}
+if [ $? != 0 ]; then
+  echo "[ERROR] The external elastic search ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} was not available within ${MEEDS_ES_TIMEOUT}s ! Meeds startup aborted ..."
+  exit 1
 fi
 
 set +u		# DEACTIVATE unbound variable check

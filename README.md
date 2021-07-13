@@ -28,7 +28,7 @@ Some add-ons are already installed in the Meeds image but you can install other 
 | VARIABLE               | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                               |
 |------------------------|-----------|---------------|-------------------------------------------------------------------------------------------|
 | MEEDS_ADDONS_LIST        | NO        | -             | commas separated list of add-ons to install (ex: meeds-wallet,meeds-perk-store:2.0.x-SNAPSHOT)    |
-| MEEDS_ADDONS_REMOVE_LIST | NO        | -             | commas separated list of add-ons to uninstall (ex: meeds-es-embedded) |
+| MEEDS_ADDONS_REMOVE_LIST | NO        | -             | commas separated list of add-ons to uninstall |
 | MEEDS_ADDONS_CATALOG_URL | NO        | -             | The url of a valid Meeds addons Catalog                                                            |
 
 ### JVM
@@ -98,8 +98,6 @@ The following environment variables should be passed to the container in order t
 
 | VARIABLE                | MANDATORY | DEFAULT VALUE  | DESCRIPTION                                                                                                                                                                                                                                                                    |
 |-------------------------|-----------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| MEEDS_ES_EMBEDDED         | NO        | `true`         | do we use an elasticsearch server embedded in the Meeds Server JVM or do we use an external one ? (using an embedded elasticsearch server is not recommanded for production purpose) (if set to `false` the add-on `meeds-es-embedded` is uninstalled during container creation) |
-| MEEDS_ES_EMBEDDED_DATA    | NO        | `/srv/meeds/es/` | The directory to use for storing elasticsearch data (in embedded mode only).                                                                                                                                                                                                   |
 | MEEDS_ES_SCHEME           | NO        | `http`         | the elasticsearch server scheme to use from the Meeds Server jvm perspective (http / https).                                                                                                                                                                            |
 | MEEDS_ES_HOST             | NO        | `localhost`    | the elasticsearch server hostname to use from the Meeds Server jvm perspective.                                                                                                                                                                                         |
 | MEEDS_ES_PORT             | NO        | `9200`         | the elasticsearch server port to use from the Meeds Server jvm perspective.                                                                                                                                                                                             |
@@ -107,9 +105,7 @@ The following environment variables should be passed to the container in order t
 | MEEDS_ES_PASSWORD         | NO        | -              | the password to connect to the elasticsearch server (if authentication is activated on the external elasticsearch).                                                                                                                                                            |
 | MEEDS_ES_INDEX_REPLICA_NB | NO        | `0`            | the number of replicat for elasticsearch indexes (leave 0 if you don't have an elasticsearch cluster).                                                                                                                                                                         |
 | MEEDS_ES_INDEX_SHARD_NB   | NO        | `0`            | the number of shard for elasticsearch indexes.                                                                                                                                                                                                                                 |
-| MEEDS_ES_TIMEOUT          | NO        | `60`           | the number of seconds to wait for elasticsearch availability before cancelling Meeds startup (only if MEEDS_ES_EMBEDDED=false)                                                                                                                                                 |
-
-INFO: the default embedded ElasticSearch in not recommended for production purpose.
+| MEEDS_ES_TIMEOUT          | NO        | `60`           | the number of seconds to wait for elasticsearch availability before cancelling Meeds startup                                                                                                                                               |
 
 ### Mail
 
