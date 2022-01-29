@@ -133,6 +133,7 @@ MEEDS_ES_URL="${MEEDS_ES_SCHEME}://${MEEDS_ES_HOST}:${MEEDS_ES_PORT}"
 [ -z "${MEEDS_REWARDS_WALLET_NETWORK_ENDPOINT_HTTP}" ] && MEEDS_REWARDS_WALLET_NETWORK_ENDPOINT_HTTP="https://mainnet.infura.io/v3/a1ac85aea9ce4be88e9e87dad7c01d40"
 [ -z "${MEEDS_REWARDS_WALLET_NETWORK_ENDPOINT_WEBSOCKET}" ] && MEEDS_REWARDS_WALLET_NETWORK_ENDPOINT_WEBSOCKET="wss://mainnet.infura.io/ws/v3/a1ac85aea9ce4be88e9e87dad7c01d40"
 [ -z "${MEEDS_REWARDS_WALLET_TOKEN_ADDRESS}" ] && MEEDS_REWARDS_WALLET_TOKEN_ADDRESS="0xc76987d43b77c45d51653b6eb110b9174acce8fb"
+[ -z "${MEEDS_GZIP_ENABLED}" ] && MEEDS_GZIP_ENABLED="true"
 
 set -u		# REACTIVATE unbound variable check
 
@@ -322,7 +323,13 @@ else
       exit 1
     }
   fi
-
+  # Gzip compression
+  if [ "${MEEDS_GZIP_ENABLED}" = "true" ]; then
+    xmlstarlet ed -L -u "/Server/Service/Connector/@compression" -v "on" /opt/exo/conf/server.xml || {
+      echo "ERROR during xmlstarlet processing (configuring Connector compression)"
+      exit 1
+    }
+  fi
   # Elasticsearch configuration
   add_in_meeds_configuration "# Elasticsearch configuration"
   add_in_meeds_configuration "exo.es.embedded.enabled=false"
