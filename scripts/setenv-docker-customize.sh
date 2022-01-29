@@ -325,7 +325,7 @@ else
   fi
   # Gzip compression
   if [ "${MEEDS_GZIP_ENABLED}" = "true" ]; then
-    xmlstarlet ed -L -u "/Server/Service/Connector/@compression" -v "on" /opt/exo/conf/server.xml || {
+    xmlstarlet ed -L -u "/Server/Service/Connector/@compression" -v "on" /opt/meeds/conf/server.xml || {
       echo "ERROR during xmlstarlet processing (configuring Connector compression)"
       exit 1
     }
