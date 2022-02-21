@@ -56,3 +56,4 @@ services:
 volumes:
   meeds_data:
   meeds_logs:
+  search_data:
