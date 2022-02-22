@@ -80,16 +80,16 @@ case "${MEEDS_DB_TYPE}" in
     sleep 2
     ;;
   mysql)
-    [ -z "${MEEDS_DB_NAME}" ] && MEEDS_DB_NAME="exo"
-    [ -z "${MEEDS_DB_USER}" ] && MEEDS_DB_USER="exo"
+    [ -z "${MEEDS_DB_NAME}" ] && MEEDS_DB_NAME="meeds"
+    [ -z "${MEEDS_DB_USER}" ] && MEEDS_DB_USER="meeds"
     [ -z "${MEEDS_DB_PASSWORD}" ] && { echo "ERROR: you must provide a database password with MEEDS_DB_PASSWORD environment variable"; exit 1;}
     [ -z "${MEEDS_DB_HOST}" ] && MEEDS_DB_HOST="db"
     [ -z "${MEEDS_DB_PORT}" ] && MEEDS_DB_PORT="3306"
     [ -z "${MEEDS_DB_MYSQL_USE_SSL}" ] && MEEDS_DB_MYSQL_USE_SSL="false"
     ;;
   pgsql|postgres|postgresql)
-    [ -z "${MEEDS_DB_NAME}" ] && MEEDS_DB_NAME="exo"
-    [ -z "${MEEDS_DB_USER}" ] && MEEDS_DB_USER="exo"
+    [ -z "${MEEDS_DB_NAME}" ] && MEEDS_DB_NAME="meeds"
+    [ -z "${MEEDS_DB_USER}" ] && MEEDS_DB_USER="meeds"
     [ -z "${MEEDS_DB_PASSWORD}" ] && { echo "ERROR: you must provide a database password with MEEDS_DB_PASSWORD environment variable"; exit 1;}
     [ -z "${MEEDS_DB_HOST}" ] && MEEDS_DB_HOST="db"
     [ -z "${MEEDS_DB_PORT}" ] && MEEDS_DB_PORT="5432"
