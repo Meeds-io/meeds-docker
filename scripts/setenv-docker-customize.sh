@@ -386,7 +386,7 @@ else
   add_in_meeds_configuration "exo.email.smtp.socketFactory.class="
   # SMTP TLS Version, Example: TLSv1.2
   if [ ! -z "${MEEDS_SMTP_SSL_PROTOCOLS:-}" ]; then 
-    add_in_exo_configuration "mail.smtp.ssl.protocols=${MEEDS_SMTP_SSL_PROTOCOLS}"
+    add_in_meeds_configuration "mail.smtp.ssl.protocols=${MEEDS_SMTP_SSL_PROTOCOLS}"
   fi
 
   # JMX configuration
@@ -461,13 +461,13 @@ else
   add_in_meeds_configuration "exo.wallet.blockchain.network.http=${MEEDS_REWARDS_WALLET_NETWORK_ENDPOINT_HTTP}"
   add_in_meeds_configuration "exo.wallet.blockchain.network.websocket=${MEEDS_REWARDS_WALLET_NETWORK_ENDPOINT_WEBSOCKET}"
   add_in_meeds_configuration "exo.wallet.blockchain.token.address=${MEEDS_REWARDS_WALLET_TOKEN_ADDRESS}"
-  [ ! -z "${MEEDS_REWARDS_WALLET_ADMIN_PRIVATE_KEY:-}" ] && add_in_exo_configuration "exo.wallet.admin.privateKey=${MEEDS_REWARDS_WALLET_ADMIN_PRIVATE_KEY}"
-  [ ! -z "${MEEDS_REWARDS_WALLET_NETWORK_CRYPTOCURRENCY:-}" ] && add_in_exo_configuration "exo.wallet.blockchain.network.cryptocurrency=${MEEDS_REWARDS_WALLET_NETWORK_CRYPTOCURRENCY}"
-  [ ! -z "${MEEDS_REWARDS_WALLET_TOKEN_SYMBOL:-}" ] && add_in_exo_configuration "exo.wallet.blockchain.token.symbol=${MEEDS_REWARDS_WALLET_TOKEN_SYMBOL}"
+  [ ! -z "${MEEDS_REWARDS_WALLET_ADMIN_PRIVATE_KEY:-}" ] && add_in_meeds_configuration "exo.wallet.admin.privateKey=${MEEDS_REWARDS_WALLET_ADMIN_PRIVATE_KEY}"
+  [ ! -z "${MEEDS_REWARDS_WALLET_NETWORK_CRYPTOCURRENCY:-}" ] && add_in_meeds_configuration "exo.wallet.blockchain.network.cryptocurrency=${MEEDS_REWARDS_WALLET_NETWORK_CRYPTOCURRENCY}"
+  [ ! -z "${MEEDS_REWARDS_WALLET_TOKEN_SYMBOL:-}" ] && add_in_meeds_configuration "exo.wallet.blockchain.token.symbol=${MEEDS_REWARDS_WALLET_TOKEN_SYMBOL}"
  
  # Rememberme Token expiration
-  add_in_exo_configuration "exo.token.rememberme.expiration.value=${MEEDS_TOKEN_REMEMBERME_EXPIRATION_VALUE}"
-  add_in_exo_configuration "exo.token.rememberme.expiration.unit=${MEEDS_TOKEN_REMEMBERME_EXPIRATION_UNIT}"
+  add_in_meeds_configuration "exo.token.rememberme.expiration.value=${MEEDS_TOKEN_REMEMBERME_EXPIRATION_VALUE}"
+  add_in_meeds_configuration "exo.token.rememberme.expiration.unit=${MEEDS_TOKEN_REMEMBERME_EXPIRATION_UNIT}"
 
   # put a file to avoid doing the configuration twice
   touch /opt/meeds/_done.configuration
