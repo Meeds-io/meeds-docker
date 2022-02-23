@@ -63,7 +63,8 @@ ENV MEEDS_GROUP ${MEEDS_USER}
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 # giving all rights to 'meeds' user
-RUN useradd --create-home --user-group --shell /bin/bash ${MEEDS_USER}
+# (we use 999 as uid like in official Docker images)
+RUN useradd --create-home -u 999 --user-group --shell /bin/bash ${MEEDS_USER}
 
 # Create needed directories
 RUN mkdir -p ${MEEDS_DATA_DIR}   && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_DATA_DIR} \
