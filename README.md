@@ -1,25 +1,59 @@
 # Meeds Docker image <!-- omit in toc -->
 
-Meeds Docker image support `HSQLDB` (for testing).
+Meeds Docker image
 
-## Quick start
+The image is compatible with the following databases system :  `MySQL` (default) / `HSQLDB` / `PostgreSQL`
 
-The prerequisites are :
+![Docker Stars](https://img.shields.io/docker/stars/meedsio/meeds.svg) - ![Docker Pulls](https://img.shields.io/docker/pulls/meedsio/meeds.svg)
 
-- Docker daemon version 12+ + internet access
-- 4GB of available RAM + 1GB of disk
-
-The most basic way to start Meeds Server for *evaluation* purpose is to execute
-
-```bash
-docker run -v meeds_data:/srv/meeds -p 8080:8080 meedsio/meeds
-```
-
-and then waiting the log line which say that the server is started.
-
-When ready just go to <http://localhost:8080> and follow the instructions.
+- [Configuration options](#configuration-options)
+  - [Add-ons](#add-ons)
+  - [Patches](#patches)
+  - [JVM](#jvm)
+  - [Frontend proxy](#frontend-proxy)
+  - [Tomcat](#tomcat)
+  - [Data on disk](#data-on-disk)
+  - [Database](#database)
+    - [MySQL](#mysql)
+  - [ElasticSearch](#elasticsearch)
+  - [LDAP / Active Directory](#ldap--active-directory)
+  - [Mail](#mail)
+  - [JMX](#jmx)
+  - [Remote Debugging](#remote-debugging)
+  - [Rememberme Token Expiration](#rememberme-token-expiration)
+  - [Cluster](#cluster)
+  - [Reward Wallet](#reward-wallet)
+- [How to](#how-to)
+  - [Configure Meeds Server behind a reverse-proxy](#configure-Meeds-Server-behind-a-reverse-proxy)
+  - [See Meeds Server logs](#see-Meeds-Server-logs)
+  - [Customize some Meeds Server settings](#customize-some-Meeds-Server-settings)
+- [Image Build](#image-build)
 
 ## Configuration options
+
+All the following options can be defined with standard Docker `-e` parameter
+
+```bash
+docker run -e MY_ENV_VARIABLE="value" ... meedsio/meeds
+```
+
+or Docker Compose way of defining environment variables
+
+```yaml
+version: '2'
+services:
+...
+  meeds:
+    image: meedsio/meeds
+    environment:
+...
+      MEEDS_ADDONS_LIST: meeds-poll
+      MEEDS_PATCHES_LIST:
+      MEEDS_PATCHES_CATALOG_URL:
+      MEEDS_ES_HOST: search
+...
+```
+
 
 ### Add-ons
 
@@ -30,6 +64,18 @@ Some add-ons are already installed in the Meeds image but you can install other 
 | MEEDS_ADDONS_LIST        | NO        | -             | commas separated list of add-ons to install (ex: meeds-wallet,meeds-perk-store:2.0.x-SNAPSHOT)    |
 | MEEDS_ADDONS_REMOVE_LIST | NO        | -             | commas separated list of add-ons to uninstall |
 | MEEDS_ADDONS_CATALOG_URL | NO        | -             | The url of a valid Meeds addons Catalog                                                            |
+| MEEDS_ADDONS_CONFLICT_MODE | NO        | -             | decision to make in case of file conflicts (overwrite, ignore or fail)                        |
+| MEEDS_ADDONS_NOCOMPAT_MODE | NO        | false         | decision to allow to install incompatible addon |
+
+### Patches
+
+Patches can be deployed in Meeds image :
+
+| VARIABLE                | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                                      |
+| ----------------------- | --------- | ------------- | ------------------------------------------------------------------------------------------------ |
+| MEEDS_PATCHES_LIST        | NO        | -             | commas separated list of patches to install (ex: patch-1.3.0:1,patch-1.3.0:2)                    |
+| MEEDS_PATCHES_CATALOG_URL | YES       | -             | The url of a valid Meeds Patches Catalog (mandatory if something is specified in MEEDS_PATCHES_LIST) |
+
 
 ### JVM
 
@@ -43,7 +89,9 @@ The standard Meeds Server environment variables can be used :
 | MEEDS_JVM_METASPACE_SIZE_MAX | NO        | `512m`        | (Java 8+) specify the jvm maximum allocated memory to MetaSpace (-XX:MaxMetaspaceSize parameter) |
 | MEEDS_JVM_USER_LANGUAGE      | NO        | `en`          | specify the jvm locale for langage (-Duser.language parameter)                                   |
 | MEEDS_JVM_USER_REGION        | NO        | `US`          | specify the jvm local for region (-Duser.region parameter)                                       |
-| MEEDS_JVM_LOG_GC_ENABLED     | NO        | `false`       | activate the JVM GC log file generation (location: $MEEDS_LOG_DIR/platform-gc.log) (5.1.0-RC12+)   |
+| MEEDS_JVM_LOG_GC_ENABLED     | NO        | `false`       | activate the JVM GC log file generation (location: $MEEDS_LOG_DIR/platform-gc.log) (1.0.0+)   |
+
+INFO: This list is not exhaustive (see ${MEEDS_HOME}/bin/setenv.sh for more parameters)
 
 ### Frontend proxy
 
@@ -67,6 +115,32 @@ The following environment variables can be passed to the container to configure 
 | MEEDS_GZIP_ENABLED       | NO        | `true`        | activate Tomcat Gzip compression for assets mimetypes
 
 
+#### Valves and Listeners <!-- omit in toc -->
+
+A file containing the list of valves and listeners can be attached to the container in the path {{/etc/meeds/host.yml}}. If a file is specified, the default valves and listeners configuration will be overridden.
+
+The file format is :
+
+```yaml
+components:
+  - type: Valve
+    className: org.acme.myvalves.WithoutAttributes
+  - type: Valve
+    className: org.acme.myvalves.WithAttributes
+    attributes:
+      - name: param1
+        value: value1
+      - name: param2
+        value: value2
+  - type: Listener
+    className: org.acme.mylistener.WthAttributes
+    attributes:
+      - name: param1
+        value: value1
+      - name: param2
+        value: value2
+```
+
 #### Data on disk
 
 The following environment variables must be passed to the container in order to work :
@@ -86,13 +160,23 @@ The following environment variables must be passed to the container in order to 
 | VARIABLE                  | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                           |
 |---------------------------|-----------|---------------|---------------------------------------------------------------------------------------|
 | MEEDS_DB_TYPE               | NO        | `hsqldb`      | Meeds server uses hsqldb by default                                       |
-| MEEDS_DB_POOL_IDM_INIT_SIZE | NO        | `5`           | the init size of IDM datasource pool                                                  |
+| MEEDS_DB_POOL_IDM_INIT_SIZE | NO        | `5`           | the init size of IDM datasource pool
+| MEEDS_DB_PORT               | NO        | ``        | the port to connect to the database server                                            |
+| MEEDS_DB_NAME               | NO        | ``         | the name of the database / schema to use                                              |
+| MEEDS_DB_USER               | NO        | ``         | the username to connect to the database                                               |
+| MEEDS_DB_PASSWORD           | YES       | -             | the password to connect to the database                                            |
 | MEEDS_DB_POOL_IDM_MAX_SIZE  | NO        | `20`          | the max size of IDM datasource pool                                                   |
 | MEEDS_DB_POOL_JCR_INIT_SIZE | NO        | `5`           | the init size of JCR datasource pool                                                  |
 | MEEDS_DB_POOL_JCR_MAX_SIZE  | NO        | `20`          | the max size of JCR datasource pool                                                   |
 | MEEDS_DB_POOL_JPA_INIT_SIZE | NO        | `5`           | the init size of JPA datasource pool                                                  |
 | MEEDS_DB_POOL_JPA_MAX_SIZE  | NO        | `20`          | the max size of JPA datasource pool                                                   |
 | MEEDS_DB_TIMEOUT            | NO        | `60`          | the number of seconds to wait for database availability before cancelling Meeds startup |
+
+#### MySQL
+
+| VARIABLE             | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                                       |
+| -------------------- | --------- | ------------- | ------------------------------------------------------------------------------------------------- |
+| MEEDS_DB_MYSQL_USE_SSL | NO        | `false`       | connecting securely to MySQL using SSL (see MySQL Connector/J documentation for useSSL parameter) |
 
 ### ElasticSearch
 
@@ -108,6 +192,16 @@ The following environment variables should be passed to the container in order t
 | MEEDS_ES_INDEX_REPLICA_NB | NO        | `0`            | the number of replicat for elasticsearch indexes (leave 0 if you don't have an elasticsearch cluster).                                                                                                                                                                         |
 | MEEDS_ES_INDEX_SHARD_NB   | NO        | `0`            | the number of shard for elasticsearch indexes.                                                                                                                                                                                                                                 |
 | MEEDS_ES_TIMEOUT          | NO        | `60`           | the number of seconds to wait for elasticsearch availability before cancelling Meeds startup                                                                                                                                               |
+
+### LDAP / Active Directory
+
+The following environment variables should be passed to the container in order to configure the ldap connection pool :
+
+| VARIABLE               | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                                                                                  |
+| ---------------------- | --------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| MEEDS_LDAP_POOL_DEBUG    | NO        | -             | the level of debug output to produce. Valid values are "fine" (trace connection creation and removal) and "all" (all debugging information). |
+| MEEDS_LDAP_POOL_TIMEOUT  | NO        | `60000`       | the number of milliseconds that an idle connection may remain in the pool without being closed and removed from the pool.                    |
+| MEEDS_LDAP_POOL_MAX_SIZE | NO        | `100`         | the maximum number of connections per connection identity that can be maintained concurrently.     
 
 ### Mail
 
@@ -136,6 +230,34 @@ The following environment variables should be passed to the container in order t
 | MEEDS_JMX_PASSWORD            | NO        | -             | a password for JMX connection (if no password is specified a random one will be generated and stored in /opt/meeds/conf/jmxremote.password) |
 
 With the default parameters you can connect to JMX with `service:jmx:rmi://localhost:10002/jndi/rmi://localhost:10001/jmxrmi` without authentication.
+
+### Remote Debugging
+
+The following environment variables should be passed to the container in order to enable remote debugging mode :
+
+| VARIABLE                    | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                                                                               |
+| --------------------------- | --------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| MEEDS_DEBUG_ENABLED           | NO        | `false`       | enable remote debugging listener                                                                                                                     |
+| MEEDS_DEBUG_PORT              | NO        | `8000`        | Remote debugging port
+
+### Rememberme Token Expiration
+
+The following environment variables should be passed to the container in order to specify rememberme token expiration :
+
+| VARIABLE                                        | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                                                                               |
+| ------------------------------------------------| --------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| MEEDS_TOKEN_REMEMBERME_EXPIRATION_VALUE           | NO        | `7`          | Number of unit expiration delay                                                                                                                     |
+| MEEDS_TOKEN_REMEMBERME_EXPIRATION_UNIT            | NO        | `DAY`        | Unit of token expiration `DAY`, `HOUR`, `MINUTE`, `SECOND`
+
+### Cluster
+
+The following environment variables should be passed to the container in order to configure the cluster :
+
+| VARIABLE              | MANDATORY | DEFAULT VALUE    | DESCRIPTION                                                                                                                                                                                                                                                           |
+| --------------------- | --------- | ---------------- | --------------------------------------------------------------------------------------------------------------                                                                                                                                                        |
+| MEEDS_CLUSTER           | NO        | `false`          | Activate the cluster mode                                                                                                                                                                                                                                             |
+| MEEDS_CLUSTER_NODE_NAME | NO        | the container id | Node name to use in the cluster for this node (ex: node1)                                                                                                                                                                                                             |
+| MEEDS_CLUSTER_HOSTS     | NO        | -                | space separated list of cluster hosts definitions (ex: name=node1,http_protocol=http,address=node1.cluster.local,http_port=8080,tcp1_port=7800,tcp2_port=7900 name=node2,http_protocol=http,address=node1.cluster.local,http_port=8080,tcp1_port=7800,tcp2_port=7900) |
 
 ### Reward Wallet
 
@@ -170,36 +292,6 @@ You can also use Docker Compose (see the provided `docker-compose.yml` file as a
 ```bash
 docker logs --follow <CONTAINER_NAME>
 ```
-
-### install Meeds Server add-ons
-
-To install add-ons in the container, provide a commas separated list of add-ons you want to install in a `MEEDS_ADDONS_LIST` environment variable to the container:
-
-```bash
-docker run -d \
-  -p 8080:8080 \
-  -e MEEDS_ADDONS_LIST="meeds-wallet:2.0.x-SNAPSHOT" \
-  meedsio/meeds
-```
-
-INFO: the provided add-ons list will be installed in the container during the container creation.
-
-### list Meeds Server add-ons available
-
-In a *running container* execute the following command:
-
-```bash
-docker exec <CONTAINER_NAME> /opt/meeds/addon list
-```
-
-### list Meeds Server add-ons installed
-
-In a *running container* execute the following command:
-
-```bash
-docker exec <CONTAINER_NAME> /opt/meeds/addon list --installed
-```
-
 ### customize some Meeds Server settings
 
 All previously mentioned [environment variables](#configuration-options) can be defined in a standard Docker way with `-e ENV_VARIABLE="value"` parameters :
@@ -211,7 +303,7 @@ docker run -d \
   meedsio/meeds
 ```
 
-Some [eXo configuration properties](https://docs.exoplatform.org/PLF50/PLFAdminGuide.Configuration.Properties_reference.html) can also be defined in an `exo.properties` file. In this case, just create this file and bind mount it in the Docker container :
+Some Meeds configuration properties can also be defined in an `exo.properties` file. In this case, just create this file and bind mount it in the Docker container :
 
 ```bash
 docker run -d \

@@ -45,7 +45,7 @@ ARG DOWNLOAD_URL
 # this allow to specifiy a user to download a protected binary
 ARG DOWNLOAD_USER
 # allow to override the list of addons to package by default
-ARG ADDONS=""
+ARG ADDONS="meeds-jdbc-driver-mysql:2.0.3 meeds-jdbc-driver-postgresql:2.0.0"
 # Default base directory on the plf archive
 ARG ARCHIVE_BASE_DIR=meeds-community-${MEEDS_VERSION}
 ARG ARCHIVE_DOWNLOAD_PATH=/srv/downloads/meeds-${MEEDS_VERSION}.zip
@@ -63,7 +63,8 @@ ENV MEEDS_GROUP ${MEEDS_USER}
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 # giving all rights to 'meeds' user
-RUN useradd --create-home --user-group --shell /bin/bash ${MEEDS_USER}
+# (we use 999 as uid like in official Docker images)
+RUN useradd --create-home -u 999 --user-group --shell /bin/bash ${MEEDS_USER}
 
 # Create needed directories
 RUN mkdir -p ${MEEDS_DATA_DIR}   && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_DATA_DIR} \
