@@ -300,6 +300,8 @@ else
   # Upload size
   add_in_meeds_configuration "exo.ecms.connector.drives.uploadLimit=${MEEDS_UPLOAD_MAX_FILE_SIZE}"
   add_in_meeds_configuration "exo.social.activity.uploadLimit=${MEEDS_UPLOAD_MAX_FILE_SIZE}"
+  add_in_meeds_configuration "wiki.attachment.uploadLimit=${MEEDS_UPLOAD_MAX_FILE_SIZE}"
+  add_in_meeds_configuration "exo.uploadLimit=${MEEDS_UPLOAD_MAX_FILE_SIZE}"
 
   # Tomcat HTTP Thread pool configuration
   xmlstarlet ed -L -s "/Server/Service/Connector" -t attr -n "maxThreads" -v "${MEEDS_HTTP_THREAD_MAX}" \
