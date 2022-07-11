@@ -35,12 +35,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: metaghcr
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v4.0.1
         with:
           images: ${{ env.REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
 
       - name: Build and push Docker image to ghcr.io
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v3.0.0
         with:
           context: .
           push: true
@@ -55,12 +55,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: metadockerhub
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v4.0.1
         with:
           images: ${{ env.DOCKERHUB_IMAGE_NAME }}
 
       - name: Build and push Docker image to Dockerhub
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v3.0.0
         with:
           context: .
           push: true
