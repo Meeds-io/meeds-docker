@@ -38,6 +38,8 @@ jobs:
         uses: docker/metadata-action@v4.0.1
         with:
           images: ${{ env.REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
 
       - name: Build and push Docker image to ghcr.io
         uses: docker/build-push-action@v3.0.0
@@ -58,6 +60,8 @@ jobs:
         uses: docker/metadata-action@v4.0.1
         with:
           images: ${{ env.DOCKERHUB_IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
 
       - name: Build and push Docker image to Dockerhub
         uses: docker/build-push-action@v3.0.0
