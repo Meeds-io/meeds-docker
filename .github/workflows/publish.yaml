@@ -68,7 +68,7 @@ jobs:
           labels: ${{ steps.metadockerhub.outputs.labels }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v2.0.0
+        uses: sigstore/cosign-installer@v2.4.1
         
       - name: Write signing key to disk
         run: 'echo "$KEY" > cosign.key'
