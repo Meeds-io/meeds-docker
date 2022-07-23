@@ -76,6 +76,6 @@ jobs:
           KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
       
       - name: Sign the published ghcr.io Docker image
-        run: cosign sign --key cosign.key ${{ steps.metaghcr.outputs.tags }}
+        run: cosign sign --key cosign.key $(echo -e ${{ steps.metaghcr.outputs.tags }} | head -1)
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
