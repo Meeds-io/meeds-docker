@@ -166,6 +166,11 @@ MEEDS_ES_URL="${MEEDS_ES_SCHEME}://${MEEDS_ES_HOST}:${MEEDS_ES_PORT}"
 
 [ -z "${MEEDS_GZIP_ENABLED}" ] && MEEDS_GZIP_ENABLED="true"
 
+# Mapping with sentenv.sh 
+[ ! -z "${MEEDS_JVM_SIZE_MAX}" ] && EXO_JVM_SIZE_MAX="${MEEDS_JVM_SIZE_MAX}"
+[ ! -z "${MEEDS_JVM_SIZE_MIN}" ] && EXO_JVM_SIZE_MIN="${MEEDS_JVM_SIZE_MIN}"
+
+
 set -u		# REACTIVATE unbound variable check
 
 # -----------------------------------------------------------------------------
