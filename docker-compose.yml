@@ -17,7 +17,7 @@
 version: '2'
 services:
   web:
-    image: nginx:1.20-alpine
+    image: nginx:1.21-alpine
     expose:
       - "80"
     ports: 
@@ -44,11 +44,11 @@ services:
       - meeds_data:/srv/meeds
       - meeds_logs:/var/log/meeds
   es:
-    image: exoplatform/elasticsearch:2.0.0
+    image: exoplatform/elasticsearch:2.0.3
     volumes:
       - search_data:/usr/share/elasticsearch/data:rw
     environment:
-      - ES_JAVA_OPTS=-Xms512m -Xmx2048m
+      - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
       - node.name=meeds
       - cluster.name=meeds
       - cluster.initial_master_nodes=meeds

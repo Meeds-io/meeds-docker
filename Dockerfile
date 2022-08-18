@@ -19,14 +19,14 @@
 # - Libre Office
 # - Meeds
 
-# Build:    docker build -t meeds-io/meeds .
+# Build:    docker build -t meedsio/meeds .
 #
 # Run:      docker run -p 8080:8080 meeds-io/meeds
 #           docker run -d -p 8080:8080 meeds-io/meeds
 #           docker run -d --rm -p 8080:8080 -v meeds_data:/srv/meeds meeds-io/meeds
 #           docker run -d -p 8080:8080 -v $(pwd)/setenv-customize.sh:/opt/meeds/bin/setenv-customize.sh:ro meeds-io/meeds
 
-FROM    exoplatform/jdk:openjdk-11-ubuntu-2004
+FROM    exoplatform/jdk:openjdk-11-ubuntu-2204
 LABEL   maintainer="Meeds <docker@exoplatform.com>"
 
 # Install the needed packages
