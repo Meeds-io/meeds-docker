@@ -38,7 +38,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Build Arguments and environment variables
-ARG MEEDS_VERSION=1.4.0-meed-20220830
+ARG MEEDS_VERSION=1.4.0-meed-20220831
 
 # this allow to specify a Meeds download url
 ARG DOWNLOAD_URL
