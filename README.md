@@ -112,7 +112,8 @@ The following environment variables can be passed to the container to configure 
 | MEEDS_HTTP_THREAD_MAX    | NO        | `200`         | maximum number of threads in the tomcat http connector                       |
 | MEEDS_HTTP_THREAD_MIN    | NO        | `10`          | minimum number of threads ready in the tomcat http connector                 |
 | MEEDS_ACCESS_LOG_ENABLED | NO        | `false`       | activate Tomcat access log with combine format and a daily log file rotation |
-| MEEDS_GZIP_ENABLED       | NO        | `true`        | activate Tomcat Gzip compression for assets mimetypes
+| MEEDS_GZIP_ENABLED       | NO        | `true`        | activate Tomcat Gzip compression for assets mimetypes                        |
+| MEEDS_LOGBACK_LOGGERS_DEBUG | NO     |            | Append logback debug scope loggers for advanced analysis (comma (`,`) seperated modules list (_ie_: `WalletStatistics,...`))                       |
 
 
 #### Valves and Listeners <!-- omit in toc -->

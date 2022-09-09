@@ -170,6 +170,8 @@ MEEDS_ES_URL="${MEEDS_ES_SCHEME}://${MEEDS_ES_HOST}:${MEEDS_ES_PORT}"
 [ ! -z "${MEEDS_JVM_SIZE_MAX}" ] && EXO_JVM_SIZE_MAX="${MEEDS_JVM_SIZE_MAX}"
 [ ! -z "${MEEDS_JVM_SIZE_MIN}" ] && EXO_JVM_SIZE_MIN="${MEEDS_JVM_SIZE_MIN}"
 
+# Logback Debug logger
+[ -z "${MEEDS_LOGBACK_LOGGERS_DEBUG}" ] && MEEDS_LOGBACK_LOGGERS_DEBUG=""
 
 set -u		# REACTIVATE unbound variable check
 
@@ -428,6 +430,23 @@ else
       exit 1
     }
   fi
+
+  # logback append debug loggers
+  if [ ! -z ${MEEDS_LOGBACK_LOGGERS_DEBUG} ]; then 
+    # Add new debug loggers (just before the end of configuration)
+    loggersList=$(echo ${MEEDS_LOGBACK_LOGGERS_DEBUG} | sed 's/,/ /g')
+    for logger in $loggersList; do 
+      xmlstarlet ed -L -s "/configuration" -t elem -n "loggerTMP" -v "" \
+        -i "//loggerTMP" -t attr -n "name" -v "${logger}" \
+        -i "//loggerTMP" -t attr -n "level" -v "DEBUG" \
+        -r "//loggerTMP" -v logger \
+        /opt/meeds/conf/logback.xml || {
+          echo "ERROR during xmlstarlet processing (adding Debug logback loggers)"
+          exit 1
+        }
+    done
+  fi
+
   # Gzip compression
   if [ "${MEEDS_GZIP_ENABLED}" = "true" ]; then
     xmlstarlet ed -L -u "/Server/Service/Connector/@compression" -v "on" /opt/meeds/conf/server.xml || {
