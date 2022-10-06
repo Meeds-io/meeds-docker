@@ -17,7 +17,7 @@
 version: '2'
 services:
   web:
-    image: nginx:1.20-alpine
+    image: nginx:1.23-alpine
     expose:
       - "80"
     ports: 
@@ -27,7 +27,7 @@ services:
     links:
       - meeds
   meeds:
-    image: meedsio/meeds
+    image: ghcr.io/meeds-io/meeds/meeds-io:develop
     environment:
       MEEDS_PROXY_VHOST: localhost
       MEEDS_PROXY_PORT: 80
@@ -44,11 +44,11 @@ services:
       - meeds_data:/srv/meeds
       - meeds_logs:/var/log/meeds
   es:
-    image: exoplatform/elasticsearch:2.0.0
+    image: exoplatform/elasticsearch:2.0.3
     volumes:
       - search_data:/usr/share/elasticsearch/data:rw
     environment:
-      - ES_JAVA_OPTS=-Xms512m -Xmx2048m
+      - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
       - node.name=meeds
       - cluster.name=meeds
       - cluster.initial_master_nodes=meeds
