@@ -67,6 +67,14 @@ jobs:
           tags: ${{ steps.metadockerhub.outputs.tags }}
           labels: ${{ steps.metadockerhub.outputs.labels }}
 
+      - name: Sign and push docker image
+        uses: sudo-bot/action-docker-sign@latest
+        with:
+          image-ref: ${{ steps.metadockerhub.outputs.tags }}
+          private-key-id: "${{ secrets.DOCKER_PRIVATE_KEY_ID }}"
+          private-key: ${{ secrets.DOCKER_PRIVATE_KEY }}
+          private-key-passphrase: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v2.4.1
         
