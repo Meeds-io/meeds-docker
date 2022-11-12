@@ -113,7 +113,7 @@ The following environment variables can be passed to the container to configure 
 | MEEDS_HTTP_THREAD_MIN    | NO        | `10`          | minimum number of threads ready in the tomcat http connector                 |
 | MEEDS_ACCESS_LOG_ENABLED | NO        | `false`       | activate Tomcat access log with combine format and a daily log file rotation |
 | MEEDS_GZIP_ENABLED       | NO        | `true`        | activate Tomcat Gzip compression for assets mimetypes
-
+| MEEDS_CONNECTION_TIMEOUT       | NO        | `20000`        | Tomcat Connection timeout                        |
 
 #### Valves and Listeners <!-- omit in toc -->
 
