@@ -435,6 +435,13 @@ else
       exit 1
     }
   fi
+
+  # Connection timeout
+  xmlstarlet ed -L -u "/Server/Service/Connector/@connectTimeout" -v "${MEEDS_CONNECTION_TIMEOUT:-20000}" /opt/meeds/conf/server.xml || {
+    echo "ERROR during xmlstarlet processing (configuring Connector connectTimeout)"
+    exit 1
+  }
+
   # Elasticsearch configuration
   add_in_meeds_configuration "# Elasticsearch configuration"
   add_in_meeds_configuration "exo.es.embedded.enabled=false"
