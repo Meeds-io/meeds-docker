@@ -438,7 +438,7 @@ else
 
   # Connection timeout
   xmlstarlet ed -L -u "/Server/Service/Connector/@connectionTimeout" -v "${MEEDS_CONNECTION_TIMEOUT:-20000}" /opt/meeds/conf/server.xml || {
-    echo "ERROR during xmlstarlet processing (configuring Connector connectTimeout)"
+    echo "ERROR during xmlstarlet processing (configuring Connector connectionTimeout)"
     exit 1
   }
 
