@@ -30,12 +30,17 @@ FROM    exoplatform/jdk:openjdk-17-ubuntu-2204
 LABEL   maintainer="Meeds <docker@exoplatform.com>"
 
 # Install the needed packages
-RUN apt-get update \
-    && apt-get -y upgrade ${_APT_OPTIONS} \
-    && apt-get -y install ${_APT_OPTIONS} xmlstarlet fontconfig fontconfig-config \
-    && apt-get -y autoremove \
-    && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
+    apt-get -y update  && \
+    apt-get -y install apt-utils    --no-install-recommends && \
+    apt-get -y install libfreetype6 --no-install-recommends && \
+    apt-get -y install fontconfig   --no-install-recommends && \
+    apt-get -y install fonts-dejavu --no-install-recommends && \
+    apt-get -y upgrade ${_APT_OPTIONS} && \
+    apt-get -y install ${_APT_OPTIONS} xmlstarlet && \
+    apt-get -y autoremove && \
+    apt-get -y clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Build Arguments and environment variables
 ARG MEEDS_VERSION=1.4.0-exo-M31
