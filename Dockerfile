@@ -32,7 +32,7 @@ LABEL   maintainer="Meeds <docker@exoplatform.com>"
 # Install the needed packages
 RUN apt-get update \
     && apt-get -y upgrade ${_APT_OPTIONS} \
-    && apt-get -y install ${_APT_OPTIONS} xmlstarlet \
+    && apt-get -y install ${_APT_OPTIONS} xmlstarlet fontconfig fontconfig-config \
     && apt-get -y autoremove \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
