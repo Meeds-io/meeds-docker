@@ -26,21 +26,19 @@
 #           docker run -d --rm -p 8080:8080 -v meeds_data:/srv/meeds meeds-io/meeds
 #           docker run -d -p 8080:8080 -v $(pwd)/setenv-customize.sh:/opt/meeds/bin/setenv-customize.sh:ro meeds-io/meeds
 
-FROM    exoplatform/jdk:openjdk-21-ubuntu-2404
+FROM    openjdk:17-alpine
 LABEL   maintainer="Meeds <docker@exoplatform.com>"
 
-# Install the needed packages
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
-    apt-get -y update  && \
-    apt-get -y install apt-utils    --no-install-recommends && \
-    apt-get -y install libfreetype6 --no-install-recommends && \
-    apt-get -y install fontconfig   --no-install-recommends && \
-    apt-get -y install fonts-dejavu --no-install-recommends && \
-    apt-get -y upgrade ${_APT_OPTIONS} && \
-    apt-get -y install ${_APT_OPTIONS} xmlstarlet && \
-    apt-get -y autoremove && \
-    apt-get -y clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+  apk upgrade && \
+  apk add --no-cache xmlstarlet jq bash curl tini && \
+  apk --no-cache add msttcorefonts-installer fontconfig && \
+  update-ms-fonts &&  fc-cache -f 
+
+RUN wget -nv -q -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.9.3/yq_linux_amd64 && \
+  chmod a+x /usr/bin/yq
+
+RUN sed -i "s/999/99/" /etc/group    
 
 # Build Arguments and environment variables
 ARG MEEDS_VERSION=7.0.0-M16
@@ -69,12 +67,14 @@ ENV MEEDS_GROUP=${MEEDS_USER}
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 # giving all rights to 'meeds' user
 # (we use 999 as uid like in official Docker images)
-RUN useradd --create-home -u 999 --user-group --shell /bin/bash ${MEEDS_USER}
-
+RUN addgroup -g 999 ${MEEDS_USER}
+RUN adduser -u 999 -G ${MEEDS_USER} -s /bin/bash --disabled-password ${MEEDS_USER}
 # Create needed directories
 RUN mkdir -p ${MEEDS_DATA_DIR}   && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_DATA_DIR} \
     && mkdir -p ${MEEDS_TMP_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_TMP_DIR} \
     && mkdir -p ${MEEDS_LOG_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_LOG_DIR}
+
+RUN mkdir -p /srv/downloads
 
 RUN if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
   echo "Building an image with Meeds version : ${MEEDS_VERSION}" && \
@@ -92,6 +92,10 @@ RUN if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
   ln -s ${MEEDS_APP_DIR}/gatein/conf /etc/meeds && \
   rm -rf ${MEEDS_APP_DIR}/logs && ln -s ${MEEDS_LOG_DIR} ${MEEDS_APP_DIR}/logs && \
   rm -f ${ARCHIVE_DOWNLOAD_PATH}
+
+# Add wait-for
+RUN wget -nv -q -O /usr/bin/wait-for https://raw.githubusercontent.com/eficode/wait-for/v2.1.3/wait-for && \
+  chmod a+x /usr/bin/wait-for
 
 # Install Docker customization file
 ADD scripts/setenv-docker-customize.sh ${MEEDS_APP_DIR}/bin/setenv-docker-customize.sh
@@ -113,7 +117,7 @@ VOLUME ["/srv/meeds"]
 RUN for a in ${ADDONS}; do echo "Installing addon $a"; /opt/meeds/addon install $a; done
 
 WORKDIR ${MEEDS_LOG_DIR}
-ENTRYPOINT ["/usr/local/bin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "--"]
 # Health Check
 HEALTHCHECK CMD curl --fail http://localhost:8080/ || exit 1
 CMD [ "/opt/meeds/start_eXo.sh" ]

@@ -689,7 +689,7 @@ CATALINA_OPTS="${CATALINA_OPTS:-} -Djava.security.egd=file:/dev/./urandom"
 case "${MEEDS_DB_TYPE}" in
   mysql)
     echo "Waiting for database ${MEEDS_DB_TYPE} availability at ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} ..."
-    wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -s -t ${MEEDS_DB_TIMEOUT}
+    wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -q -t ${MEEDS_DB_TIMEOUT}
     if [ $? != 0 ]; then
       echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! Meeds startup aborted ..."
       exit 1
@@ -699,7 +699,7 @@ case "${MEEDS_DB_TYPE}" in
     ;;
   pgsql|postgres|postgresql)
     echo "Waiting for database ${MEEDS_DB_TYPE} availability at ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} ..."
-    wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -s -t ${MEEDS_DB_TIMEOUT}
+    wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -q -t ${MEEDS_DB_TIMEOUT}
     if [ $? != 0 ]; then
       echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! Meeds startup aborted ..."
       exit 1
@@ -711,7 +711,7 @@ esac
 
 # Wait for elasticsearch availability
 echo "Waiting for external elastic search availability at ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} ..."
-wait-for ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} -s -t ${MEEDS_ES_TIMEOUT}
+wait-for ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} -q -t ${MEEDS_ES_TIMEOUT}
 if [ $? != 0 ]; then
   echo "[ERROR] The external elastic search ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} was not available within ${MEEDS_ES_TIMEOUT}s ! Meeds startup aborted ..."
   exit 1
