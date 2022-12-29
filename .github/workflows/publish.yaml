@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - '*'
-    branches: [ develop ]
+    branches: [ develop, alpine ]
 env:
   REGISTRY: ghcr.io
   GHCR_IMAGE_NAME: 'meeds-io/meeds/meeds-io'
