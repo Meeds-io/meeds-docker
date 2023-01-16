@@ -50,7 +50,7 @@ ARG DOWNLOAD_URL
 # this allow to specifiy a user to download a protected binary
 ARG DOWNLOAD_USER
 # allow to override the list of addons to package by default
-ARG ADDONS="meeds-jdbc-driver-mysql:2.0.4 meeds-jdbc-driver-postgresql:2.2.0"
+ARG ADDONS="meeds-jdbc-driver-mysql:2.0.4 meeds-jdbc-driver-postgresql:2.3.0"
 # Default base directory on the plf archive
 ARG ARCHIVE_BASE_DIR=meeds-community-${MEEDS_VERSION}
 ARG ARCHIVE_DOWNLOAD_PATH=/srv/downloads/meeds-${MEEDS_VERSION}.zip
