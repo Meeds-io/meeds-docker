@@ -159,8 +159,9 @@ The following environment variables must be passed to the container in order to 
 
 | VARIABLE                  | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                           |
 |---------------------------|-----------|---------------|---------------------------------------------------------------------------------------|
-| MEEDS_DB_TYPE               | NO        | `hsqldb`      | Meeds server uses hsqldb by default                                       |
+| MEEDS_DB_TYPE               | NO        | `hsqldb`      | Meeds server uses hsqldb by default. Possible values: `mysql`, `postgresql` or `hsqldb` |
 | MEEDS_DB_POOL_IDM_INIT_SIZE | NO        | `5`           | the init size of IDM datasource pool
+| MEEDS_DB_HOST               | NO        | `db`      | Meeds database server host. This is needed only when `MEEDS_DB_TYPE` is set to `mysql` or `postgresql`   |
 | MEEDS_DB_PORT               | NO        | ``        | the port to connect to the database server                                            |
 | MEEDS_DB_NAME               | NO        | ``         | the name of the database / schema to use                                              |
 | MEEDS_DB_USER               | NO        | ``         | the username to connect to the database                                               |
