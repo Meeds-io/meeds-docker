@@ -38,6 +38,7 @@ jobs:
 
       - name: Build and push Docker image to ghcr.io
         uses: docker/build-push-action@v4
+        id: pushghcr
         with:
           context: .
           push: true
@@ -75,7 +76,7 @@ jobs:
           private-key-passphrase: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v2.8.1
+        uses: sigstore/cosign-installer@v3.1.1
         
       - name: Write signing key to disk
         run: 'echo "$KEY" > cosign.key'
@@ -83,6 +84,8 @@ jobs:
           KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
       
       - name: Sign the published ghcr.io Docker image
-        run: cosign sign --key cosign.key ${{ steps.metaghcr.outputs.tags }}
+        run: cosign sign --yes --key cosign.key "${TAGS}@${DIGEST}"
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          DIGEST: ${{ steps.pushghcr.outputs.digest }}
+          TAGS: ${{ steps.metaghcr.outputs.tags }}
