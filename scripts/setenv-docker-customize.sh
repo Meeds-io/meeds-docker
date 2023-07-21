@@ -544,10 +544,16 @@ else
     echo "# no add-on to install from MEEDS_ADDONS_LIST environment variable."
   else
     echo "# installing add-ons from MEEDS_ADDONS_LIST environment variable:"
+    _ADDON_COUNTER=0
     echo ${MEEDS_ADDONS_LIST} | tr ',' '\n' | while read _addon ; do
       if [ -n "${_addon}" ]; then
+        _ADDON_COUNTER=$((_ADDON_COUNTER+1))
         # Install addon
-        ${MEEDS_APP_DIR}/addon install ${_ADDON_MGR_OPTIONS:-} ${_ADDON_MGR_OPTION_CATALOG:-} ${_addon} --force --batch-mode
+        if [ ${_ADDON_COUNTER} -eq "1" ]; then 
+          ${MEEDS_APP_DIR}/addon install ${_ADDON_MGR_OPTIONS:-} ${_ADDON_MGR_OPTION_CATALOG:-} ${_addon} --force --batch-mode --no-cache
+        else
+          ${MEEDS_APP_DIR}/addon install ${_ADDON_MGR_OPTIONS:-} ${_ADDON_MGR_OPTION_CATALOG:-} ${_addon} --force --batch-mode
+        fi
         if [ $? != 0 ]; then
           echo "[ERROR] Problem during add-on [${_addon}] install."
           exit 1
@@ -685,7 +691,7 @@ case "${MEEDS_DB_TYPE}" in
     echo "Waiting for database ${MEEDS_DB_TYPE} availability at ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} ..."
     wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -s -t ${MEEDS_DB_TIMEOUT}
     if [ $? != 0 ]; then
-      echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! eXo startup aborted ..."
+      echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! Meeds startup aborted ..."
       exit 1
     else
       echo "Database ${MEEDS_DB_TYPE} is available, continue starting..."
@@ -695,7 +701,7 @@ case "${MEEDS_DB_TYPE}" in
     echo "Waiting for database ${MEEDS_DB_TYPE} availability at ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} ..."
     wait-for ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} -s -t ${MEEDS_DB_TIMEOUT}
     if [ $? != 0 ]; then
-      echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! eXo startup aborted ..."
+      echo "[ERROR] The ${MEEDS_DB_TYPE} database ${MEEDS_DB_HOST}:${MEEDS_DB_PORT} was not available within ${MEEDS_DB_TIMEOUT}s ! Meeds startup aborted ..."
       exit 1
     else
       echo "Database ${MEEDS_DB_TYPE} is available, continue starting..."
