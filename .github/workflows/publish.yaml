@@ -66,6 +66,7 @@ jobs:
 
       - name: Build and push Docker image to Dockerhub
         uses: docker/build-push-action@v4
+        id: pushdockerhub
         with:
           context: .
           push: true
@@ -94,3 +95,10 @@ jobs:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           DIGEST: ${{ steps.pushghcr.outputs.digest }}
           TAGS: ${{ steps.metaghcr.outputs.tags }}
+
+      - name: Sign the published Dockerhub Docker image
+        run: cosign sign --yes --key cosign.key "${TAGS}@${DIGEST}"
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          DIGEST: ${{ steps.pushdockerhub.outputs.digest }}
+          TAGS: ${{ steps.metadockerhub.outputs.tags }}
