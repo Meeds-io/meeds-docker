@@ -66,13 +66,14 @@ jobs:
 
       - name: Build and push Docker image to Dockerhub
         uses: docker/build-push-action@v4
+        id: pushdockerhub
         with:
           context: .
           push: true
           tags: ${{ steps.metadockerhub.outputs.tags }}
           labels: ${{ steps.metadockerhub.outputs.labels }}
 
-      - name: Sign and push docker image
+      - name: Sign the published Dockerhub Docker image with DCT
         uses: sudo-bot/action-docker-sign@latest
         with:
           image-ref: ${{ steps.metadockerhub.outputs.tags }}
@@ -88,9 +89,16 @@ jobs:
         env:
           KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
       
-      - name: Sign the published ghcr.io Docker image
+      - name: Sign the published ghcr.io Docker image with Cosign
         run: cosign sign --yes --key cosign.key "${TAGS}@${DIGEST}"
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           DIGEST: ${{ steps.pushghcr.outputs.digest }}
           TAGS: ${{ steps.metaghcr.outputs.tags }}
+
+      - name: Sign the published Dockerhub Docker image with Cosign
+        run: cosign sign --yes --key cosign.key "${TAGS}@${DIGEST}"
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          DIGEST: ${{ steps.pushdockerhub.outputs.digest }}
+          TAGS: ${{ steps.metadockerhub.outputs.tags }}
