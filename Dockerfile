@@ -43,7 +43,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
     rm -rf /var/lib/apt/lists/*
 
 # Build Arguments and environment variables
-ARG MEEDS_VERSION=1.5.0-meed-20231122
+ARG MEEDS_VERSION=1.5.0-meed-20231123
 
 # this allow to specify a Meeds download url
 ARG DOWNLOAD_URL
