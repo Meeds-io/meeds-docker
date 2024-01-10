@@ -11,8 +11,8 @@ sudo sysctl -w vm.max_map_count=262144
 ```
 ## Start Meeds
 ```bash
-docker-compose up -d
-docker-compose logs -f meeds
+docker-compose -p demo up -d
+docker-compose -p demo logs -f meeds
 ```
 
 Wait for Meeds startup. A log message should appear:
@@ -25,15 +25,15 @@ After Meeds startup. Click on `Web preview` <walkthrough-web-preview-icon></walk
 Hope you enjoyed Meeds. You can tear down the server by following one of these options:
  - To stop Meeds without removing docker containers:
     ```bash
-    docker-compose stop
+    docker-compose -p demo stop
     ```
  - To stop Meeds with removing docker containers:
     ```bash
-    docker-compose down
+    docker-compose -p demo down
     ```
  - To stop Meeds with removing docker containers and volumes:
     ```bash
-    docker-compose down -v
+    docker-compose -p demo down -v
     ```
 You can start again meeds by following the previous step.
 
