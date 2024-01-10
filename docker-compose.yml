@@ -16,16 +16,6 @@
 #
 version: '2'
 services:
-  web:
-    image: nginx:1.23-alpine
-    expose:
-      - "80"
-    ports: 
-      - "80:80"
-    volumes:
-      - ./conf/nginx.conf:/etc/nginx/nginx.conf:ro
-    links:
-      - meeds
   meeds:
     image: ghcr.io/meeds-io/meeds/meeds-io:develop
     environment:
@@ -43,6 +33,10 @@ services:
     volumes:
       - meeds_data:/srv/meeds
       - meeds_logs:/var/log/meeds
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
   es:
     image: exoplatform/elasticsearch:2.0.3
     volumes:
