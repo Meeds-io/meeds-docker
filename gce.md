@@ -19,7 +19,7 @@ Wait for Meeds startup. A log message should appear:
 ```
 | INFO  | Server startup in [XXXXX] milliseconds [org.apache.catalina.startup.Catalina<main>]
 ```
-After Meeds startup. Click on `Web preview` Button and click on `Preview on Port 8080`. Enjoy!
+After Meeds startup. Click on `Web preview`  Button and click on `Preview on Port 8080`. Enjoy!
 
 ## Stop Meeds
 Hope you enjoyed Meeds. You can tear down the server by following one of these options:
