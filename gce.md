@@ -1,4 +1,7 @@
 # How to run ?
+
+Weclome to Meeds-io Startup tutorial. Here we will show you how to run Meeds in few steps. To get started, click on Start!
+
 ## VM Setup
 Elasticsearch uses a mmapfs directory by default to store its indices. The default operating system limits on mmap counts is likely to be too low, which may result in out of memory exceptions. See [doc](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html).
 ```
