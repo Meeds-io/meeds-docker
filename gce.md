@@ -1,5 +1,7 @@
 # How to run ?
 
+## Getting started
+
 Weclome to Meeds-io Startup tutorial. Here we will show you how to run Meeds in few steps. To get started, click on Start!
 
 ## VM Setup
