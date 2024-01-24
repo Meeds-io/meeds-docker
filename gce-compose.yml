@@ -1,0 +1,53 @@
+#
+# This file is part of the Meeds project (https://meeds.io/).
+# Copyright (C) 2024 Meeds Association
+# contact@meeds.io
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 3 of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+version: '2'
+services:
+  meeds:
+    image: ghcr.io/meeds-io/meeds/meeds-io:nightly-exo
+    environment:
+      MEEDS_PROXY_VHOST: localhost
+      MEEDS_PROXY_PORT: 80
+      MEEDS_PROXY_SSL: "false"
+      MEEDS_DB_NAME: meeds
+      MEEDS_DB_USER: meeds
+      MEEDS_DB_PASSWORD: my-secret-pw
+      MEEDS_ADDONS_LIST: 
+      MEEDS_JVM_LOG_GC_ENABLED: "true"
+      MEEDS_ES_SCHEME: http
+      MEEDS_ES_HOST: es
+      MEEDS_ES_PORT: 9200
+    volumes:
+      - meeds_data:/srv/meeds
+      - meeds_logs:/var/log/meeds
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+  es:
+    image: exoplatform/elasticsearch:2.0.3
+    volumes:
+      - search_data:/usr/share/elasticsearch/data:rw
+    environment:
+      - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
+      - node.name=meeds
+      - cluster.name=meeds
+      - cluster.initial_master_nodes=meeds
+      - network.host=_site_   
+volumes:
+  meeds_data:
+  meeds_logs:
+  search_data:
