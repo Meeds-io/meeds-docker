@@ -2,7 +2,7 @@
 
 Meeds Docker image
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FMeeds-io%2Fmeeds-docker&cloudshell_git_branch=develo-exop&cloudshell_tutorial=gce.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FMeeds-io%2Fmeeds-docker&cloudshell_git_branch=develop-exo&cloudshell_tutorial=gce.md)
 
 The image is compatible with the following databases system :  `MySQL` (default) / `HSQLDB` / `PostgreSQL`
 
