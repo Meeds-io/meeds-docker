@@ -40,6 +40,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
           flavor: |
             latest=false
+          tags: |
             type=ref,event=tag
             type=raw,value=nightly-exo
 
