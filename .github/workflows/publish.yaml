@@ -9,7 +9,7 @@ on:
   push:
     tags:
       - '*'
-    branches: [ develop ]
+    branches: [ develop, continuous-release-exo ]
 env:
   REGISTRY: ghcr.io
   GHCR_IMAGE_NAME: 'meeds-io/meeds/meeds-io'
@@ -40,6 +40,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
           flavor: |
             latest=false
+            type=ref,event=tag
+            type=raw,value=nightly-exo
+
 
       - name: Build and push Docker image to ghcr.io
         uses: docker/build-push-action@v4
