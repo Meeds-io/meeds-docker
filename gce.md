@@ -9,6 +9,16 @@ Elasticsearch uses a mmapfs directory by default to store its indices. The defau
 ```bash
 sudo sysctl -w vm.max_map_count=262144
 ```
+
+## Upgrade docker-compose cli
+
+The provided docker-compose cli is outdated with the recent version of the docker daemon. So we need to update it as follow:
+
+```bash
+sudo wget -q https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -O /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
 ## Start Meeds
 ```bash
 docker-compose -f gce-compose.yml -p demo up -d
