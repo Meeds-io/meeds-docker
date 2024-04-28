@@ -36,7 +36,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: metaghcr
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
           flavor: |
@@ -63,7 +63,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: metadockerhub
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.DOCKERHUB_IMAGE_NAME }}
           flavor: |
