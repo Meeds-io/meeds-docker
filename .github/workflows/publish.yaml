@@ -38,7 +38,7 @@ jobs:
             latest=false
 
       - name: Build and push Docker image to ghcr.io
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         id: pushghcr
         with:
           context: .
@@ -61,7 +61,7 @@ jobs:
             latest=false
 
       - name: Build and push Docker image to Dockerhub
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         id: pushdockerhub
         with:
           context: .
