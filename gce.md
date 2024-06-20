@@ -29,7 +29,7 @@ Wait for Meeds's startup. A log message should appear:
 ```
 | INFO  | Server startup in [XXXXX] milliseconds [org.apache.catalina.startup.Catalina<main>]
 ```
-After Meeds startup. Click on `Web preview` <walkthrough-web-preview-icon></walkthrough-web-preview-icon> Button and click on `Preview on Port 8080`. Enjoy!
+After Meeds startup. Click on `Web preview` <walkthrough-web-preview-icon></walkthrough-web-preview-icon> Button and click on `Preview on Port 8080`. The default login credentials are `root`:`password`. Enjoy!
 
 ## Stop Meeds
 Hope you enjoyed Meeds. You can tear down the server by following one of these options:
