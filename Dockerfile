@@ -55,14 +55,14 @@ ARG ADDONS="meeds-jdbc-driver-mysql:2.0.4 meeds-jdbc-driver-postgresql:2.2.0"
 ARG ARCHIVE_BASE_DIR=meeds-community-${MEEDS_VERSION}
 ARG ARCHIVE_DOWNLOAD_PATH=/srv/downloads/meeds-${MEEDS_VERSION}.zip
 
-ENV MEEDS_APP_DIR   /opt/meeds
-ENV MEEDS_CONF_DIR  /etc/meeds
-ENV MEEDS_DATA_DIR  /srv/meeds
-ENV MEEDS_LOG_DIR   /var/log/meeds
-ENV MEEDS_TMP_DIR   /tmp/meeds-tmp
+ENV MEEDS_APP_DIR=/opt/meeds
+ENV MEEDS_CONF_DIR=/etc/meeds
+ENV MEEDS_DATA_DIR=/srv/meeds
+ENV MEEDS_LOG_DIR=/var/log/meeds
+ENV MEEDS_TMP_DIR=/tmp/meeds-tmp
 
-ENV MEEDS_USER meeds
-ENV MEEDS_GROUP ${MEEDS_USER}
+ENV MEEDS_USER=meeds
+ENV MEEDS_GROUP=${MEEDS_USER}
 
 # Customise system
 
