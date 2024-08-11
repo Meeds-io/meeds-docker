@@ -38,7 +38,7 @@ services:
     ports:
       - "8080:8080"
   es:
-    image: exoplatform/elasticsearch:2.0.3
+    image: elasticsearch:8.14.3
     volumes:
       - search_data:/usr/share/elasticsearch/data:rw
     environment:
@@ -47,6 +47,7 @@ services:
       - cluster.name=meeds
       - cluster.initial_master_nodes=meeds
       - network.host=_site_   
+      - xpack.security.enabled=false
 volumes:
   meeds_data:
   meeds_logs:
