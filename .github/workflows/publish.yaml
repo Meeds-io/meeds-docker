@@ -68,6 +68,9 @@ jobs:
           images: ${{ env.DOCKERHUB_IMAGE_NAME }}
           flavor: |
             latest=false
+          tags: |
+            type=ref,event=tag
+            type=raw,value=nightly-exo
 
       - name: Build and push Docker image to Dockerhub
         uses: docker/build-push-action@v5
