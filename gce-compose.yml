@@ -17,7 +17,7 @@
 version: '2'
 services:
   meeds:
-    image: ghcr.io/meeds-io/meeds/meeds-io:develop
+    image: ghcr.io/meeds-io/meeds/meeds-io:alpine
     environment:
       MEEDS_PROXY_VHOST: localhost
       MEEDS_PROXY_PORT: 80
