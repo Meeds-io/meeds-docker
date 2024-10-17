@@ -2,8 +2,6 @@
 
 Official Meeds Docker image
 
-[![Open in Cloud Shell](gce.png)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FMeeds-io%2Fmeeds-docker&cloudshell_git_branch=develop&cloudshell_tutorial=gce.md) 
-
 The image is compatible with the following databases system :  `MySQL` (default) / `HSQLDB` / `PostgreSQL`
 
 ![Docker Stars](https://img.shields.io/docker/stars/meedsio/meeds.svg) - ![Docker Pulls](https://img.shields.io/docker/pulls/meedsio/meeds.svg)
