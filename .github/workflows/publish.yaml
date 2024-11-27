@@ -18,10 +18,10 @@ jobs:
         id: detect-push-event
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            echo "This is a tag push"
-            echo "buildTags=${GITHUB_REF#refs/tags/}_0" >> $GITHUB_OUTPUT
+            echo "This is a tag push (${GITHUB_REF#refs/tags/})"
+            echo "buildTags=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            echo "This is a branch push"
+            echo "This is a branch push (${GITHUB_REF#refs/heads/})"
             echo "buildTags=${{ env.BRANCH_BUILD_TAGS }}" >> $GITHUB_OUTPUT
           else
             echo "Unknown push type"
