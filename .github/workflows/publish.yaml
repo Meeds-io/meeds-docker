@@ -1,130 +1,76 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Create and publish a Docker image
 
 on:
   push:
     tags:
       - '*'
-    branches: [ develop, continuous-release-exo ]
+    branches: [ continuous-release-exo ]
 env:
-  REGISTRY: ghcr.io
-  GHCR_IMAGE_NAME: 'meeds-io/meeds/meeds-io'
-  DOCKERHUB_IMAGE_NAME: 'meedsio/meeds'
-
+  BRANCH_BUILD_TAGS: "nightly-exo"
 jobs:
-  build-and-push-image:
+  parse-docker-build-env:
+    name: 'Parse Docker Build Environment'
     runs-on: ubuntu-latest
+    outputs:
+      buildTags: ${{ steps.detect-push-event.outputs.buildTags }}
+    steps:
+      - name: Check if push is a tag or branch
+        id: detect-push-event
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "This is a tag push (${GITHUB_REF#refs/tags/})"
+            echo "Building docker tag: ${GITHUB_REF#refs/tags/}"
+            echo "buildTags=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          elif [[ $GITHUB_REF == refs/heads/* ]]; then
+            echo "This is a branch push (${GITHUB_REF#refs/heads/})"
+            echo "Building docker tags: ${{ env.BRANCH_BUILD_TAGS }}"
+            echo "buildTags=${{ env.BRANCH_BUILD_TAGS }}" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown push type"
+            exit 1
+          fi
+  build-dockerhub-image:
     permissions:
       contents: read
       packages: write
-      id-token: write # needed for signing the images with GitHub OIDC Token
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.SWF_ACTOR }}
-          password: ${{ secrets.SWF_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: metaghcr
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=ref,event=tag
-            type=raw,value=nightly-exo
-
-
-      - name: Build and push Docker image to ghcr.io
-        uses: docker/build-push-action@v5
-        id: pushghcr
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.metaghcr.outputs.tags }}
-          labels: ${{ steps.metaghcr.outputs.labels }}
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: metadockerhub
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKERHUB_IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=ref,event=tag
-            type=raw,value=nightly-exo
-
-      - name: Build and push Docker image to Dockerhub
-        uses: docker/build-push-action@v5
-        id: pushdockerhub
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.metadockerhub.outputs.tags }}
-          labels: ${{ steps.metadockerhub.outputs.labels }}
-
-      - name: Sign the published Dockerhub Docker image with DCT
-        uses: sudo-bot/action-docker-sign@latest
-        with:
-          image-ref: ${{ steps.metadockerhub.outputs.tags }}
-          private-key-id: "${{ secrets.DOCKER_PRIVATE_KEY_ID }}"
-          private-key: ${{ secrets.DOCKER_PRIVATE_KEY }}
-          private-key-passphrase: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.5.0
-        
-      - name: Sign the published ghcr.io Docker image with Cosign
-        run: |
-          images=""
-          for tag in ${TAGS}; do
-            images+="${tag}@${DIGEST} "
-          done
-          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${images}
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          DIGEST: ${{ steps.pushghcr.outputs.digest }}
-          TAGS: ${{ steps.metaghcr.outputs.tags }}
-
-      - name: Sign the images with GitHub OIDC Token
-        run: |
-          images=""
-          for tag in ${TAGS}; do
-            images+="${tag}@${DIGEST} "
-          done
-          cosign sign --yes ${images}
-        env:
-          DIGEST: ${{ steps.pushghcr.outputs.digest }}
-          TAGS: ${{ steps.metaghcr.outputs.tags }}
-
-      - name: Sign the published Dockerhub Docker image with Cosign
-        run: |
-          images=""
-          for tag in ${TAGS}; do
-            images+="${tag}@${DIGEST} "
-          done
-          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${images}
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          DIGEST: ${{ steps.pushdockerhub.outputs.digest }}
-          TAGS: ${{ steps.metadockerhub.outputs.tags }}
+      id-token: write
+      attestations: write
+    name: "Build Docker Images to DockerHub Registry"
+    uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@master
+    needs: parse-docker-build-env
+    with:
+      dockerImage: "meedsio/meeds"
+      dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+      signImage: true
+      cosignImage: true
+      attestImage: true
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_PRIVATE_KEY_ID: ${{ secrets.DOCKER_PRIVATE_KEY_ID }}
+      DOCKER_PRIVATE_KEY: ${{ secrets.DOCKER_PRIVATE_KEY }}
+      DOCKER_PRIVATE_KEY_PASSPHRASE: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+  build-ghcr-image:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    name: "Build Docker Images to Github Container Registry"
+    uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@master
+    needs: parse-docker-build-env
+    with:
+      dockerRegistry: "ghcr.io"
+      dockerImage: "meeds-io/meeds/meeds-io"
+      dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+      cosignImage: true
+      cosignOidcImage: true
+      attestImage: true
+      attestImageRegistry: "ghcr.io"
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
+      DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
