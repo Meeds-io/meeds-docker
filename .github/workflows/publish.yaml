@@ -5,17 +5,39 @@ on:
     tags:
       - '*'
     branches: [ cosign ]
-
+env:
+  BRANCH_BUILD_TAGS: "latest,develop"
 jobs:
+  parse-docker-tags:
+    name: 'Parse Docker Build Tags'
+    runs-on: ubuntu-latest
+    outputs:
+      buildTags: ${{ steps.detect-push-event.outputs.buildTags }}
+    steps:
+      - name: Check if push is a tag or branch
+        id: detect-push-event
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "This is a tag push"
+            echo "buildTags=${GITHUB_REF#refs/tags/}_0" >> $GITHUB_OUTPUT
+          elif [[ $GITHUB_REF == refs/heads/* ]]; then
+            echo "This is a branch push"
+            echo "buildTags=${{ env.BRANCH_BUILD_TAGS }}" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown push type"
+            exit 1
+          fi
   build-dockerhub-image:
     permissions:
       contents: read
       packages: write
       id-token: write # needed for signing the images with GitHub OIDC Token
+    name: "Build Docker Images on DockerHub Registry"
     uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@cosign
+    needs: parse-docker-tags
     with:
       dockerImage: "meedsio/meeds"
-      dockerImageTag: "latest,develop"
+      dockerImageTag: ${{ needs.parse-docker-tags.outputs.buildTags }}
       signImage: true
       cosignImage: true
     secrets:
@@ -31,11 +53,13 @@ jobs:
       contents: read
       packages: write
       id-token: write # needed for signing the images with GitHub OIDC Token
+    name: "Build Docker Images on Github Container Registry"
     uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@cosign
+    needs: parse-docker-tags
     with:
       dockerRegistry: "ghcr.io"
       dockerImage: "meeds-io/meeds/meeds-io"
-      dockerImageTag: "latest,develop"
+      dockerImageTag: ${{ needs.parse-docker-tags.outputs.buildTags }}
       cosignImage: true
     secrets:
       DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
