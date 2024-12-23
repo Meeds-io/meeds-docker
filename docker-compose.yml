@@ -43,7 +43,7 @@ services:
       MEEDS_ES_PORT: 9200
     volumes:
       - meeds_data:/srv/meeds
-      - meeds_codecs:/etc/meeds/codec
+      - meeds_codec:/etc/meeds/codec
       - meeds_logs:/var/log/meeds
   es:
     image: elasticsearch:8.14.3
@@ -58,6 +58,6 @@ services:
       - xpack.security.enabled=false
 volumes:
   meeds_data:
-  meeds_codecs:
+  meeds_codec:
   meeds_logs:
   search_data:
