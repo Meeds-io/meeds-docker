@@ -52,6 +52,7 @@ ARG ARCHIVE_DOWNLOAD_PATH=/srv/downloads/meeds-${MEEDS_VERSION}.zip
 
 ENV MEEDS_APP_DIR=/opt/meeds
 ENV MEEDS_CONF_DIR=/etc/meeds
+ENV MEEDS_CODEC_DIR=/etc/meeds/codec
 ENV MEEDS_DATA_DIR=/srv/meeds
 ENV MEEDS_LOG_DIR=/var/log/meeds
 ENV MEEDS_TMP_DIR=/tmp/meeds-tmp
@@ -85,6 +86,7 @@ RUN if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
   mv /srv/downloads/${ARCHIVE_BASE_DIR} ${MEEDS_APP_DIR} && \
   chown -R ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_APP_DIR} && \
   ln -s ${MEEDS_APP_DIR}/gatein/conf /etc/meeds && \
+  mkdir -p ${MEEDS_CODEC_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_CODEC_DIR} && \
   rm -rf ${MEEDS_APP_DIR}/logs && ln -s ${MEEDS_LOG_DIR} ${MEEDS_APP_DIR}/logs && \
   rm -f ${ARCHIVE_DOWNLOAD_PATH}
 
@@ -102,7 +104,7 @@ RUN chmod 755 ${MEEDS_APP_DIR}/bin/setenv-docker-customize.sh && \
 
 USER ${MEEDS_USER}
 EXPOSE 8080
-VOLUME ["/srv/meeds"]
+VOLUME ["/srv/meeds", "/etc/meeds/codec"]
 
 # INSTALLING Meeds addons
 RUN for a in ${ADDONS}; do echo "Installing addon $a"; /opt/meeds/addon install $a; done
