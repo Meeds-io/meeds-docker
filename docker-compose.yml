@@ -14,10 +14,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-version: '2'
+# version: '2' # Uncomment for legacy docker compose versions
+name: 'meeds'
 services:
   web:
-    image: nginx:1.25-alpine
+    image: nginx:1.26-alpine
     expose:
       - "80"
     ports: 
@@ -42,11 +43,12 @@ services:
       MEEDS_ES_PORT: 9200
     volumes:
       - meeds_data:/srv/meeds
+      - meeds_codecs:/etc/meeds/codec
       - meeds_logs:/var/log/meeds
   es:
     image: elasticsearch:8.14.3
     volumes:
-      - search_data:/usr/share/elasticsearch/data:rw
+      - search_data:/usr/share/elasticsearch/data
     environment:
       - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
       - node.name=meeds
@@ -56,5 +58,6 @@ services:
       - xpack.security.enabled=false
 volumes:
   meeds_data:
+  meeds_codecs:
   meeds_logs:
   search_data:
