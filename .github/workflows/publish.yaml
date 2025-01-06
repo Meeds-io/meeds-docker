@@ -72,13 +72,13 @@ jobs:
         uses: exo-actions/buildDockerImage-action/sign-image@v1 
         id: sign-docker-image
         with:
-          dockerImage: "meedsio/meeds"          
+          dockerImage: "meedsio/meeds"
+          dockerImageTag: ${{needs.build-dockerhub-image.outputs.tags}}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_PRIVATE_KEY_ID: ${{secrets.DOCKER_PRIVATE_KEY_ID}}
           DOCKER_PRIVATE_KEY: ${{secrets.DOCKER_PRIVATE_KEY}}
           DOCKER_PRIVATE_KEY_PASSPHRASE: ${{secrets.DOCKER_PRIVATE_KEY_PASSPHRASE}}
-
   attest-dockerhub-image:
     permissions:
         contents: read
@@ -170,7 +170,8 @@ jobs:
         uses: exo-actions/buildDockerImage-action/sign-image@v1 
         id: sign-docker-image
         with:
-          dockerImage: "meeds-io/meeds/meeds-io"          
+          dockerImage: "meeds-io/meeds/meeds-io"
+          dockerImageTag: ${{needs.build-ghcr-image.outputs.tags}}
           DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
           DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
           DOCKER_PRIVATE_KEY_ID: ${{secrets.DOCKER_PRIVATE_KEY_ID}}
