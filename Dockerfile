@@ -38,7 +38,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Build Arguments and environment variables
-ARG MEEDS_VERSION=7.0.1-exo-20250505
+ARG MEEDS_VERSION=7.0.1-exo-20250506
 
 # this allow to specify a Meeds download url
 ARG DOWNLOAD_URL
