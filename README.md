@@ -18,6 +18,7 @@ The image is compatible with the following databases system :  `MySQL` (default)
   - [Database](#database)
     - [MySQL](#mysql)
   - [ElasticSearch](#elasticsearch)
+  - [Matrix](#matrix)
   - [LDAP / Active Directory](#ldap--active-directory)
   - [Mail](#mail)
   - [JMX](#jmx)
@@ -194,6 +195,17 @@ The following environment variables should be passed to the container in order t
 | MEEDS_ES_INDEX_REPLICA_NB | NO        | `0`            | the number of replicat for elasticsearch indexes (leave 0 if you don't have an elasticsearch cluster).                                                                                                                                                                         |
 | MEEDS_ES_INDEX_SHARD_NB   | NO        | `0`            | the number of shard for elasticsearch indexes.                                                                                                                                                                                                                                 |
 | MEEDS_ES_TIMEOUT          | NO        | `60`           | the number of seconds to wait for elasticsearch availability before cancelling Meeds startup                                                                                                                                               |
+
+### Matrix
+
+The following environment variables should be passed to the container in order to configure the matrix chat feature :
+
+| VARIABLE              | MANDATORY | DEFAULT VALUE | DESCRIPTION                                                                                  |
+| --------------------- | --------- | ------------- | -------------------------------------------------------------------------------------------- |
+| `MEEDS_WAIT_FOR_MATRIX` | No        | `false`       | Enables or disables the wait check for Matrix server availability during startup.
+| `MEEDS_MATRIX_HOST`     | No        | `matrix`      | Hostname or IP address of the Matrix server.                                                
+| `MEEDS_MATRIX_PORT`     | No        | `8008`        | Port for the Matrix client API (non-TLS). 
+| `MEEDS_MATRIX_TIMEOUT`  | No        | `30`          | Maximum number of seconds to wait for the Matrix server to become available before aborting. |
 
 ### LDAP / Active Directory
 
