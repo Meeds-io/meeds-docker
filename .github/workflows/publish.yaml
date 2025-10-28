@@ -4,9 +4,9 @@ on:
   push:
     tags:
       - '*'
-    branches: [ develop-exo ]
+    branches: [ 7.1.x-exo ]
 env:
-  BRANCH_BUILD_TAGS: "develop-exo"
+  BRANCH_BUILD_TAGS: "7.1-exo-latest"
 jobs:
   parse-docker-build-env:
     name: 'Parse Docker Build Environment'
