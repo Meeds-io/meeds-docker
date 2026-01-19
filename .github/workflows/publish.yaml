@@ -29,201 +29,48 @@ jobs:
             echo "Unknown push type"
             exit 1
           fi
-# dockerhub docker image build          
   build-dockerhub-image:
     permissions:
-        contents: read
-        packages: write
-        id-token: write
-        attestations: write
-    name: "Build Docker Images and push them to DockerHub Registry"
-    runs-on: ubuntu-latest
-    outputs:
-      tags: ${{ steps.build-docker-image.outputs.tags }}
-      digest: ${{ steps.build-docker-image.outputs.digest }}
-    timeout-minutes: 120
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    name: "Build Docker Images to DockerHub Registry"
+    uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@master
     needs: parse-docker-build-env
-    steps:
-      - name: build docker image
-        uses: exo-actions/buildDockerImage-action/build-and-push-image@v1 
-        id: build-docker-image
-        with:
-          dockerImage: "meedsio/meeds"
-          dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }} 
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-  sign-dockerhub-image:
-    permissions:
-        contents: read
-        packages: write
-        id-token: write
-    strategy: 
-      fail-fast: false
-      max-parallel: 1
-      matrix: 
-        tags: ${{ fromJson(needs.build-dockerhub-image.outputs.tags) }}        
-    name: "sign-docker-image"
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    needs: build-dockerhub-image
-    steps:
-      - name: sign docker image
-        uses: exo-actions/buildDockerImage-action/sign-image@v1 
-        id: sign-docker-image
-        with:
-          dockerImage: "meedsio/meeds"
-          dockerImageTag: ${{needs.build-dockerhub-image.outputs.tags}}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_PRIVATE_KEY_ID: ${{secrets.DOCKER_PRIVATE_KEY_ID}}
-          DOCKER_PRIVATE_KEY: ${{secrets.DOCKER_PRIVATE_KEY}}
-          DOCKER_PRIVATE_KEY_PASSPHRASE: ${{secrets.DOCKER_PRIVATE_KEY_PASSPHRASE}}
-  attest-dockerhub-image:
-    permissions:
-        contents: read
-        packages: write
-        id-token: write
-        attestations: write
-    name: "attest-docker-image"
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    needs: build-dockerhub-image
-    steps:
-      - name: attest docker image
-        uses: exo-actions/buildDockerImage-action/attest-image@v1 
-        id: attest-docker-image
-        with:
-          dockerImage: "meedsio/meeds"
-          dockerImageDigest: ${{ needs.build-dockerhub-image.outputs.digest }} 
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          attestImage: "true"
-
-  cosign-dockerhub-image:
-    permissions:
-        contents: read
-        packages: write
-        id-token: write
-        attestations: write
-    name: "cosign-docker-image"
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    needs: build-dockerhub-image
-    steps:
-      - name: attest docker image
-        uses: exo-actions/buildDockerImage-action/cosign-image@v1 
-        id: cosign-docker-image
-        with:
-          dockerImage: "meedsio/meeds"
-          dockerImageTag: ${{ needs.build-dockerhub-image.outputs.tags }} 
-          dockerImageDigest: ${{ needs.build-dockerhub-image.outputs.digest }} 
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          cosignImage: "true"
-          cosignOidcImage: "true"
-          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
-          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}    
-
-# ghcr docker image build     
-
+    with:
+      dockerImage: "meedsio/meeds"
+      dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+      signImage: true
+      cosignImage: true
+      attestImage: true
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_PRIVATE_KEY_ID: ${{ secrets.DOCKER_PRIVATE_KEY_ID }}
+      DOCKER_PRIVATE_KEY: ${{ secrets.DOCKER_PRIVATE_KEY }}
+      DOCKER_PRIVATE_KEY_PASSPHRASE: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
   build-ghcr-image:
     permissions:
-        contents: read
-        packages: write
-        id-token: write
-        attestations: write
-    name: "Build Docker Images and push them to ghcr Registry"
-    runs-on: ubuntu-latest
-    outputs:
-      tags: ${{ steps.build-ghcr-image.outputs.tags }}
-      digest: ${{ steps.build-ghcr-image.outputs.digest }}
-    timeout-minutes: 120
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    name: "Build Docker Images to Github Container Registry"
+    uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@master
     needs: parse-docker-build-env
-    steps:
-      - name: build docker image
-        uses: exo-actions/buildDockerImage-action/build-and-push-image@v1 
-        id: build-ghcr-image
-        with:
-          dockerImage: "meeds-io/meeds/meeds-io"
-          dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }} 
-          DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
-          DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
-          dockerRegistry: "ghcr.io"
-
-  sign-ghcr-image:
-    permissions:
-        contents: read
-        packages: write
-        id-token: write
-    strategy: 
-      fail-fast: false
-      max-parallel: 1
-      matrix: 
-        tags: ${{ fromJson(needs.build-ghcr-image.outputs.tags) }}        
-    name: "sign-docker-image"
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    needs: build-ghcr-image
-    steps:
-      - name: sign docker image
-        uses: exo-actions/buildDockerImage-action/sign-image@v1 
-        id: sign-docker-image
-        with:
-          dockerImage: "meeds-io/meeds/meeds-io"
-          dockerImageTag: ${{needs.build-ghcr-image.outputs.tags}}
-          DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
-          DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
-          DOCKER_PRIVATE_KEY_ID: ${{secrets.DOCKER_PRIVATE_KEY_ID}}
-          DOCKER_PRIVATE_KEY: ${{secrets.DOCKER_PRIVATE_KEY}}
-          DOCKER_PRIVATE_KEY_PASSPHRASE: ${{secrets.DOCKER_PRIVATE_KEY_PASSPHRASE}}
-          dockerRegistry: "ghcr.io"
-
-  attest-ghcr-image:
-    permissions:
-        contents: read
-        packages: write
-        id-token: write
-        attestations: write
-    name: "attest-docker-image"
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    needs: build-ghcr-image
-    steps:
-      - name: attest docker image
-        uses: exo-actions/buildDockerImage-action/attest-image@v1 
-        id: attest-docker-image
-        with:
-          dockerImage: "meeds-io/meeds/meeds-io"
-          dockerImageDigest: ${{ needs.build-ghcr-image.outputs.digest }} 
-          DOCKER_USERNAME: ${{ secrets.SWF_TOKEN }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          attestImage: "true"
-          dockerRegistry: "ghcr.io"
-          attestImageRegistry: "ghcr.io" 
-
-  cosign-ghcr-image:
-    permissions:
-        contents: read
-        packages: write
-        id-token: write
-        attestations: write
-    name: "cosign-docker-image"
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    needs: build-ghcr-image
-    steps:
-      - name: attest docker image
-        uses: exo-actions/buildDockerImage-action/cosign-image@v1 
-        id: cosign-docker-image
-        with:
-          dockerImage: "meeds-io/meeds/meeds-io"
-          dockerImageTag: ${{ needs.build-ghcr-image.outputs.tags }} 
-          dockerImageDigest: ${{ needs.build-ghcr-image.outputs.digest }} 
-          DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
-          DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
-          cosignImage: "true"
-          cosignOidcImage: "true"
-          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
-          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}  
-          dockerRegistry: "ghcr.io"
+    with:
+      dockerRegistry: "ghcr.io"
+      dockerImage: "meeds-io/meeds/meeds-io"
+      dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+      cosignImage: true
+      cosignOidcImage: true
+      attestImage: true
+      attestImageRegistry: "ghcr.io"
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
+      DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
