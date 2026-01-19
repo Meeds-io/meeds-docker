@@ -30,43 +30,45 @@ jobs:
             exit 1
           fi
   build-dockerhub-image:
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-      attestations: write
     name: "Build Docker Images to DockerHub Registry"
-    uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@master
-    needs: parse-docker-build-env
-    with:
-      dockerImage: "meedsio/meeds"
-      dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
-      cosignImage: true
-      attestImage: true
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-  build-ghcr-image:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
-    name: "Build Docker Images to Github Container Registry"
-    uses: exoplatform/swf-scripts/.github/workflows/buildDockerImage.yml@master
     needs: parse-docker-build-env
-    with:
-      dockerRegistry: "ghcr.io"
-      dockerImage: "meeds-io/meeds/meeds-io"
-      dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
-      cosignImage: true
-      cosignOidcImage: true
-      attestImage: true
-      attestImageRegistry: "ghcr.io"
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
-      DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
-      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+    steps:
+    - uses: exo-actions/buildDockerImage-action@v1
+      with:
+        dockerImage: "meedsio/meeds"
+        dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+        cosignImage: true
+        attestImage: true
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+  build-ghcr-image:
+    name: "Build Docker Images to Github Container Registry"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    needs: parse-docker-build-env     
+    steps:
+    - uses: exo-actions/buildDockerImage-action@v1
+      with:
+        dockerRegistry: "ghcr.io"
+        dockerImage: "meeds-io/meeds/meeds-io"
+        dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+        cosignImage: true
+        cosignOidcImage: true
+        attestImage: true
+        attestImageRegistry: "ghcr.io"
+        DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
+        DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
