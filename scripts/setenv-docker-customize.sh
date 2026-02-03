@@ -142,6 +142,10 @@ MEEDS_ES_URL="${MEEDS_ES_SCHEME}://${MEEDS_ES_HOST}:${MEEDS_ES_PORT}"
 [ -z "${MEEDS_ES_INDEX_REPLICA_NB}" ] && MEEDS_ES_INDEX_REPLICA_NB="1"
 [ -z "${MEEDS_ES_INDEX_SHARD_NB}" ] && MEEDS_ES_INDEX_SHARD_NB="5"
 
+[ -z "${MEEDS_WAIT_FOR_MATRIX}" ] && MEEDS_WAIT_FOR_MATRIX="false"
+[ -z "${MEEDS_MATRIX_HOST}" ] && MEEDS_MATRIX_HOST="matrix"
+[ -z "${MEEDS_MATRIX_PORT}" ] && MEEDS_MATRIX_PORT="8008"
+[ -z "${MEEDS_MATRIX_TIMEOUT}" ] && MEEDS_MATRIX_TIMEOUT="30"
 
 [ -z "${MEEDS_LDAP_POOL_TIMEOUT}" ] && MEEDS_LDAP_POOL_TIMEOUT="60000"
 [ -z "${MEEDS_LDAP_POOL_MAX_SIZE}" ] && MEEDS_LDAP_POOL_MAX_SIZE="100"
@@ -716,6 +720,20 @@ wait-for ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} -q -t ${MEEDS_ES_TIMEOUT}
 if [ $? != 0 ]; then
   echo "[ERROR] The external elastic search ${MEEDS_ES_HOST}:${MEEDS_ES_PORT} was not available within ${MEEDS_ES_TIMEOUT}s ! Meeds startup aborted ..."
   exit 1
+fi
+
+# Wait for Matrix availability
+if [ "${MEEDS_WAIT_FOR_MATRIX}" = "true" ]; then
+  echo "Waiting for Matrix server availability at ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} ..."
+  wait-for ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} -s -t ${MEEDS_MATRIX_TIMEOUT}
+  if [ $? != 0 ]; then
+    echo "[ERROR] The Matrix server at ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} was not available within ${MEEDS_MATRIX_TIMEOUT}s! Meeds startup aborted ..."
+    exit 1
+  else
+    echo "Matrix is available, continue starting..."
+  fi
+else
+  echo "Skipping Matrix availability check (MEEDS_WAIT_FOR_MATRIX=${MEEDS_WAIT_FOR_MATRIX})"
 fi
 
 set +u		# DEACTIVATE unbound variable check
