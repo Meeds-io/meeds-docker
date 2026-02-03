@@ -35,7 +35,7 @@ RUN apk update && \
   apk --no-cache add msttcorefonts-installer fontconfig && \
   update-ms-fonts &&  fc-cache -f 
 
-RUN wget -nv -q -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.9.3/yq_linux_amd64 && \
+RUN wget -nv -q -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.50.1/yq_linux_amd64 && \
   chmod a+x /usr/bin/yq
 
 RUN sed -i "s/999/99/" /etc/group    
