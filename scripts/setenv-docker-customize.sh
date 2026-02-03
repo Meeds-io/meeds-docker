@@ -725,7 +725,7 @@ fi
 # Wait for Matrix availability
 if [ "${MEEDS_WAIT_FOR_MATRIX}" = "true" ]; then
   echo "Waiting for Matrix server availability at ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} ..."
-  wait-for ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} -s -t ${MEEDS_MATRIX_TIMEOUT}
+  wait-for ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} -q -t ${MEEDS_MATRIX_TIMEOUT}
   if [ $? != 0 ]; then
     echo "[ERROR] The Matrix server at ${MEEDS_MATRIX_HOST}:${MEEDS_MATRIX_PORT} was not available within ${MEEDS_MATRIX_TIMEOUT}s! Meeds startup aborted ..."
     exit 1
