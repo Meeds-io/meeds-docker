@@ -41,7 +41,7 @@ RUN wget -nv -q -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download
 RUN sed -i "s/999/99/" /etc/group    
 
 # Build Arguments and environment variables
-ARG MEEDS_VERSION=7.2.0-M18
+ARG MEEDS_VERSION=7.2.0-M19
 
 # this allow to specify a Meeds download url
 ARG DOWNLOAD_URL
