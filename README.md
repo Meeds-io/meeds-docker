@@ -6,6 +6,8 @@ The image is compatible with the following databases system:  `MySQL` (default) 
 
 ![Docker Stars](https://img.shields.io/docker/stars/meedsio/meeds.svg) - ![Docker Pulls](https://img.shields.io/docker/pulls/meedsio/meeds.svg)
 
+> **Multi-Architecture Support**: Starting from version `7.3.0-M06`, Meeds Docker images are built for both `linux/amd64` and `linux/arm64` architectures. This allows running Meeds on Apple Silicon (M1/M2/M3), AWS Graviton, and other ARM64-based systems. Previous versions are amd64 only.
+
 - [Configuration options](#configuration-options)
   - [Add-ons](#add-ons)
   - [Patches](#patches)
