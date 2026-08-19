@@ -7,6 +7,9 @@ on:
     branches: [ continuous-release-exo ]
 env:
   BRANCH_BUILD_TAGS: "nightly-exo"
+  DOCKER_IMAGE: "meedsio/meeds"
+  GHCR_IMAGE: "meeds-io/meeds/meeds-io"
+
 jobs:
   parse-docker-build-env:
     name: 'Parse Docker Build Environment'
@@ -29,46 +32,146 @@ jobs:
             echo "Unknown push type"
             exit 1
           fi
-  build-dockerhub-image:
-    name: "Build Docker Images to DockerHub Registry"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-      attestations: write
+
+  build-platforms:
+    name: "Build ${{ matrix.platform }}"
+    runs-on: ${{ matrix.runner }}
     needs: parse-docker-build-env
+    permissions:
+      actions: write
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
-    - uses: exo-actions/buildDockerImage-action@v1
-      with:
-        dockerImage: "meedsio/meeds"
-        dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
-        cosignImage: true
-        attestImage: true
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-  build-ghcr-image:
-    name: "Build Docker Images to Github Container Registry"
+      - uses: exo-actions/buildDockerImage-action/build-and-push-image@v1
+        id: build
+        with:
+          dockerImage: ${{ env.DOCKER_IMAGE }}
+          dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+          platforms: ${{ matrix.platform }}
+          qemu: "false"
+          annotations: |
+            org.opencontainers.image.title=Meeds
+            org.opencontainers.image.description=Docker image for Meeds
+            org.opencontainers.image.vendor=Meeds
+            org.opencontainers.image.source=https://github.com/meeds-io/meeds-docker
+            org.opencontainers.image.authors=Meeds <docker@exoplatform.com>
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Save digest
+        run: echo "${{ steps.build.outputs.digest }}" > "/tmp/${{ matrix.arch }}.digest"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.arch }}-digest
+          path: /tmp/${{ matrix.arch }}.digest
+
+  merge-dockerhub:
+    name: "Merge multi-arch manifest (Docker Hub)"
+    runs-on: ubuntu-latest
+    needs:
+      - parse-docker-build-env
+      - build-platforms
+    permissions:
+      actions: read
+    outputs:
+      tags: ${{ steps.merge.outputs.tags }}
+      digest: ${{ steps.get-digest.outputs.digest }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: amd64-digest
+          path: /tmp/digests
+      - uses: actions/download-artifact@v8
+        with:
+          name: arm64-digest
+          path: /tmp/digests
+      - uses: exo-actions/buildDockerImage-action/merge-manifest@v1
+        id: merge
+        with:
+          dockerImage: ${{ env.DOCKER_IMAGE }}
+          dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+          digestsDir: /tmp/digests
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Get merged digest
+        id: get-digest
+        run: |
+          TAG=$(echo "${{ needs.parse-docker-build-env.outputs.buildTags }}" | cut -d, -f1)
+          DIGEST=$(docker buildx imagetools inspect docker.io/${{ env.DOCKER_IMAGE }}:${TAG} --format '{{.Manifest.Digest}}')
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+
+  mirror-to-ghcr:
+    name: "Mirror to GitHub Container Registry"
+    runs-on: ubuntu-latest
+    needs:
+      - parse-docker-build-env
+      - merge-dockerhub
+    permissions:
+      packages: write
+    outputs:
+      digest: ${{ steps.mirror.outputs.digest }}
+      tagsJson: ${{ steps.mirror.outputs.tagsJson }}
+    steps:
+      - uses: exo-actions/buildDockerImage-action/mirror-image@v1
+        id: mirror
+        with:
+          sourceImage: ${{ env.DOCKER_IMAGE }}
+          sourceTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
+          targetRegistry: ghcr.io
+          targetImage: ${{ env.GHCR_IMAGE }}
+          SOURCE_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          SOURCE_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          TARGET_USERNAME: ${{ secrets.SWF_ACTOR }}
+          TARGET_PASSWORD: ${{ secrets.SWF_TOKEN }}
+
+  cosign-ghcr:
+    name: "Cosign GitHub Container Registry image"
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
       id-token: write
-      attestations: write
-    needs: parse-docker-build-env     
+    needs:
+      - parse-docker-build-env
+      - merge-dockerhub
+      - mirror-to-ghcr
     steps:
-    - uses: exo-actions/buildDockerImage-action@v1
-      with:
-        dockerRegistry: "ghcr.io"
-        dockerImage: "meeds-io/meeds/meeds-io"
-        dockerImageTag: ${{ needs.parse-docker-build-env.outputs.buildTags }}
-        cosignImage: true
-        cosignOidcImage: true
-        attestImage: true
-        attestImageRegistry: "ghcr.io"
-        DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
-        DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
-        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      - uses: exo-actions/buildDockerImage-action/cosign-image@v1
+        with:
+          dockerImage: ${{ env.GHCR_IMAGE }}
+          dockerImageTag: ${{ needs.mirror-to-ghcr.outputs.tagsJson }}
+          dockerImageDigest: ${{ needs.mirror-to-ghcr.outputs.digest }}
+          dockerRegistry: ghcr.io
+          DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
+          DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
+          cosignImage: true
+          cosignOidcImage: true
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+
+  attest-ghcr:
+    name: "Attest GitHub Container Registry image"
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      id-token: write
+      artifact-metadata: write
+    needs:
+      - parse-docker-build-env
+      - merge-dockerhub
+      - mirror-to-ghcr
+    steps:
+      - uses: exo-actions/buildDockerImage-action/attest-image@v1
+        with:
+          dockerImage: ${{ env.GHCR_IMAGE }}
+          dockerImageDigest: ${{ needs.mirror-to-ghcr.outputs.digest }}
+          dockerRegistry: ghcr.io
+          attestImage: true
+          attestImageRegistry: ghcr.io
+          DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
+          DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}

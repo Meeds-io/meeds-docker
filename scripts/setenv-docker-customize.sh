@@ -336,9 +336,9 @@ else
     i=0
     while [ $i -ge 0 ]; do
       # Declare component
-      type=$(yq read /etc/meeds/host.yml components[$i].type)
+      type=$(yq -r .components[$i].type /etc/meeds/host.yml)
       if [ "${type}" != "null" ]; then
-        className=$(yq read /etc/meeds/host.yml components[$i].className)
+        className=$(yq -r .components[$i].className /etc/meeds/host.yml)
         echo "Declare ${type} ${className}"
         xmlstarlet ed -L -s "/Server/Service/Engine/Host" -t elem -n "${type}TMP" -v "" \
             -i "//${type}TMP" -t attr -n "className" -v "${className}" \
@@ -350,9 +350,9 @@ else
         # Add component attributes
         j=0
         while [ $j -ge 0 ]; do
-          attributeName=$(yq read /etc/meeds/host.yml components[$i].attributes[$j].name)
+          attributeName=$(yq -r .components[$i].attributes[$j].name /etc/meeds/host.yml)
           if [ "${attributeName}" != "null" ]; then
-            attributeValue=$(yq read /etc/meeds/host.yml components[$i].attributes[$j].value | tr -d "'")
+            attributeValue=$(yq -r .components[$i].attributes[$j].value /etc/meeds/host.yml | tr -d "'")
             xmlstarlet ed -L -i "//${type}TMP" -t attr -n "${attributeName}" -v "${attributeValue}" \
                 /opt/meeds/conf/server.xml || {
               echo "ERROR during xmlstarlet processing (adding ${className} / ${attributeName})"

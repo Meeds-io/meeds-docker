@@ -26,16 +26,15 @@
 #           docker run -d --rm -p 8080:8080 -v meeds_data:/srv/meeds meeds-io/meeds
 #           docker run -d -p 8080:8080 -v $(pwd)/setenv-customize.sh:/opt/meeds/bin/setenv-customize.sh:ro meeds-io/meeds
 
-FROM    exoplatform/jdk:openjdk-21-ubuntu-2604
-LABEL   maintainer="Meeds <docker@exoplatform.com>"
+FROM  exoplatform/jdk:openjdk-21-ubuntu-2604
 
-# Install the needed packages
-RUN apt-get update \
-    && apt-get -y upgrade ${_APT_OPTIONS} \
-    && apt-get -y install ${_APT_OPTIONS} xmlstarlet \
-    && apt-get -y autoremove \
-    && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/*
+LABEL org.opencontainers.image.authors="Meeds <docker@exoplatform.com>" \
+      org.opencontainers.image.title="Meeds" \
+      org.opencontainers.image.description="Docker image for Meeds" \
+      org.opencontainers.image.vendor="Meeds" \
+      org.opencontainers.image.source="https://github.com/meeds-io/meeds-docker"
+
+ARG YQ_VERSION=v4.53.4
 
 # Build Arguments and environment variables
 ARG MEEDS_VERSION=7.3.0-20260818
@@ -50,29 +49,65 @@ ARG ADDONS="meeds-jdbc-driver-mysql:2.3.0 meeds-jdbc-driver-postgresql:2.5.4"
 ARG ARCHIVE_BASE_DIR=meeds-community-${MEEDS_VERSION}
 ARG ARCHIVE_DOWNLOAD_PATH=/srv/downloads/meeds-${MEEDS_VERSION}.zip
 
-ENV MEEDS_APP_DIR=/opt/meeds
-ENV MEEDS_CONF_DIR=/etc/meeds
-ENV MEEDS_CODEC_DIR=/etc/meeds/codec
-ENV MEEDS_DATA_DIR=/srv/meeds
-ENV MEEDS_LOG_DIR=/var/log/meeds
-ENV MEEDS_TMP_DIR=/tmp/meeds-tmp
-
-ENV MEEDS_USER=meeds
-ENV MEEDS_GROUP=${MEEDS_USER}
-
-# Customise system
+ENV MEEDS_APP_DIR=/opt/meeds \
+    MEEDS_CONF_DIR=/etc/meeds \
+    MEEDS_CODEC_DIR=/etc/meeds/codec \
+    MEEDS_DATA_DIR=/srv/meeds \
+    MEEDS_LOG_DIR=/var/log/meeds \
+    MEEDS_TMP_DIR=/tmp/meeds-tmp \
+    MEEDS_USER=meeds \
+    MEEDS_GROUP=meeds \
+    DEBIAN_FRONTEND=noninteractive
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-# giving all rights to 'meeds' user
-# (we use 999 as uid like in official Docker images)
-RUN useradd --create-home -u 999 --user-group --shell /bin/bash ${MEEDS_USER}
+RUN useradd --create-home -u 999 --user-group --shell /bin/bash --no-log-init ${MEEDS_USER}
+
+# Install the needed packages
+RUN apt-get -qq update && \
+    apt-get -qq -y upgrade ${_APT_OPTIONS} && \
+    apt-get -qq -y install --no-install-recommends ${_APT_OPTIONS} \
+      apt-utils \
+      libfreetype6 \
+      fontconfig \
+      fonts-dejavu \
+      xmlstarlet \
+      jq \
+      curl \
+      unzip \
+      ca-certificates && \
+    apt-get -qq -y autoremove && \
+    apt-get -qq -y clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download yq with architecture detection and checksum verification
+RUN YQ_ARCH=$(dpkg --print-architecture) && \
+    if [ "$YQ_ARCH" = "amd64" ]; then \
+        YQ_SHA256="f67d8a6a2dc2308c961f83d5ba8707fd4c7c44ad77902fef87eb3a4646cdfa2a"; \
+    elif [ "$YQ_ARCH" = "arm64" ]; then \
+        YQ_SHA256="8c3cf4cff01536588947b6e0ba1544768039e34054cd9ca8a9e4c5706dfb8631"; \
+    else \
+        echo "Unsupported architecture: $YQ_ARCH"; exit 1; \
+    fi && \
+    curl -fsSL -o /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${YQ_ARCH}" && \
+    echo "${YQ_SHA256} /usr/bin/yq" | sha256sum -c - \
+    || { \
+    echo "ERROR: the [/usr/bin/yq] binary downloaded from a github release was modified while it should not !!"; \
+    exit 1; \
+    } && \
+    chmod a+x /usr/bin/yq
+
+# Drop pebble as we use tini
+RUN rm -f /usr/bin/pebble \
+    && rm -rf /var/lib/pebble \
+    && rm -rf /etc/pebble
 
 # Create needed directories
 RUN mkdir -p ${MEEDS_DATA_DIR}   && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_DATA_DIR} \
     && mkdir -p ${MEEDS_TMP_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_TMP_DIR} \
     && mkdir -p ${MEEDS_LOG_DIR} && chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_LOG_DIR}
 
-RUN if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
+RUN set -e; \
+  if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
   echo "Building an image with Meeds version : ${MEEDS_VERSION}" && \
   if [ ! -n "${DOWNLOAD_URL}" ]; then \
   DOWNLOAD_URL="https://repository.exoplatform.org/service/local/artifact/maven/redirect?r=public&g=io.meeds.distribution&a=plf-community-tomcat-standalone&v=${MEEDS_VERSION}&p=zip"; \
@@ -91,9 +126,8 @@ RUN if [ -n "${DOWNLOAD_USER}" ]; then PARAMS="-u ${DOWNLOAD_USER}"; fi && \
   rm -f ${ARCHIVE_DOWNLOAD_PATH}
 
 # Install Docker customization file
-ADD scripts/setenv-docker-customize.sh ${MEEDS_APP_DIR}/bin/setenv-docker-customize.sh
+COPY --chown=${MEEDS_USER}:${MEEDS_GROUP} scripts/setenv-docker-customize.sh ${MEEDS_APP_DIR}/bin/setenv-docker-customize.sh
 RUN chmod 755 ${MEEDS_APP_DIR}/bin/setenv-docker-customize.sh && \
-  chown ${MEEDS_USER}:${MEEDS_GROUP} ${MEEDS_APP_DIR}/bin/setenv-docker-customize.sh && \
   sed -i '/# Load custom settings/i \
   \# Load custom settings for docker environment\n\
   [ -r "$CATALINA_BASE/bin/setenv-docker-customize.sh" ] \
