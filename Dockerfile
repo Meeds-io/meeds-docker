@@ -34,7 +34,7 @@ LABEL org.opencontainers.image.authors="Meeds <docker@exoplatform.com>" \
       org.opencontainers.image.vendor="Meeds" \
       org.opencontainers.image.source="https://github.com/meeds-io/meeds-docker"
 
-ARG YQ_VERSION=v4.53.4
+ARG YQ_VERSION=v4.53.6
 
 # Build Arguments and environment variables
 ARG MEEDS_VERSION=7.3.0-M06
@@ -82,9 +82,9 @@ RUN apt-get -qq update && \
 # Download yq with architecture detection and checksum verification
 RUN YQ_ARCH=$(dpkg --print-architecture) && \
     if [ "$YQ_ARCH" = "amd64" ]; then \
-        YQ_SHA256="f67d8a6a2dc2308c961f83d5ba8707fd4c7c44ad77902fef87eb3a4646cdfa2a"; \
+        YQ_SHA256="c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385"; \
     elif [ "$YQ_ARCH" = "arm64" ]; then \
-        YQ_SHA256="8c3cf4cff01536588947b6e0ba1544768039e34054cd9ca8a9e4c5706dfb8631"; \
+        YQ_SHA256="88a1016bc1d657375a35864e4f44b6f333df8ff97b559f51bba0adcb2169df09"; \
     else \
         echo "Unsupported architecture: $YQ_ARCH"; exit 1; \
     fi && \
