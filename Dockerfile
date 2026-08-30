@@ -37,7 +37,7 @@ LABEL org.opencontainers.image.authors="Meeds <docker@exoplatform.com>" \
 ARG YQ_VERSION=v4.53.6
 
 # Build Arguments and environment variables
-ARG MEEDS_VERSION=7.3.0-20260827
+ARG MEEDS_VERSION=7.3.0-20260830
 
 # this allow to specify a Meeds download url
 ARG DOWNLOAD_URL
