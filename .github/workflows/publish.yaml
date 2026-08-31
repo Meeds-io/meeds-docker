@@ -81,8 +81,7 @@ jobs:
     permissions:
       actions: read
     outputs:
-      tags: ${{ steps.merge.outputs.tags }}
-      digest: ${{ steps.get-digest.outputs.digest }}
+      digest: ${{ steps.merge.outputs.digest }}
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -100,12 +99,6 @@ jobs:
           digestsDir: /tmp/digests
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Get merged digest
-        id: get-digest
-        run: |
-          TAG=$(echo "${{ needs.parse-docker-build-env.outputs.buildTags }}" | cut -d, -f1)
-          DIGEST=$(docker buildx imagetools inspect docker.io/${{ env.DOCKER_IMAGE }}:${TAG} --format '{{.Manifest.Digest}}')
-          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
 
   mirror-to-ghcr:
     name: "Mirror to GitHub Container Registry"
@@ -172,6 +165,7 @@ jobs:
           dockerImageDigest: ${{ needs.mirror-to-ghcr.outputs.digest }}
           dockerRegistry: ghcr.io
           attestImage: true
+          attestSBOM: true
           attestImageRegistry: ghcr.io
           DOCKER_USERNAME: ${{ secrets.SWF_ACTOR }}
           DOCKER_PASSWORD: ${{ secrets.SWF_TOKEN }}
