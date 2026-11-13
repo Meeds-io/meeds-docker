@@ -122,6 +122,8 @@ The following environment variables can be passed to the container to configure 
 
 A file containing the list of valves and listeners can be attached to the container in the path {{/etc/meeds/host.yml}}. The default valves and listeners configuration will be overridden if a file is specified.
 
+> **Health check:** the image's `HEALTHCHECK` probes `http://localhost:8080/healthcheck`, served by `io.meeds.platform.server.tomcat.healthcheck.HealthCheckValve`. A `host.yml` replaces every default valve, so it must list this valve **first**, before any `RemoteIpValve`, otherwise the container stays `unhealthy`.
+
 The file format is :
 
 ```yaml
@@ -143,6 +145,16 @@ components:
       - name: param2
         value: value2
 ```
+
+#### Health check <!-- omit in toc -->
+
+The image declares a Docker `HEALTHCHECK` (every 30s, 300s start period) that calls `http://localhost:8080/healthcheck` from inside the container. The endpoint is provided by the platform's `HealthCheckValve` and is configured with these environment variables (set them on the container, they reach the JVM through `setenv.sh`):
+
+| VARIABLE               | MANDATORY | DEFAULT value | Description |
+|------------------------|-----------|---------------|-------------|
+| EXO_HEALTHCHECK        | NO        | `true`        | Enables the endpoint. With `false` the probe gets a 404: also disable the image's health check (`docker run --no-healthcheck`, or `healthcheck: { disable: true }` in Compose). |
+| EXO_HEALTHCHECK_ALLOW  | NO        | `127.0.0.1,::1` | Addresses allowed to call the endpoint. The list replaces the default and **must keep `127.0.0.1,::1`**, otherwise the in-container probe gets a 403. |
+| EXO_HEALTHCHECK_DEEP   | NO        | `true`        | Also checks the database and search dependencies. Set it to `false` where an orchestrator restarts containers whose probe fails, so that a dependency outage does not restart a healthy platform. |
 
 #### Data on disk
 
