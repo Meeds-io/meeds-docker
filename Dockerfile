@@ -146,5 +146,6 @@ RUN for a in ${ADDONS}; do echo "Installing addon $a"; /opt/meeds/addon install 
 WORKDIR ${MEEDS_LOG_DIR}
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
 # Health Check
-HEALTHCHECK CMD curl --fail http://localhost:8080/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=300s --retries=3 \
+  CMD curl --fail --silent --show-error http://localhost:8080/healthcheck || exit 1
 CMD [ "/opt/meeds/start_eXo.sh" ]
