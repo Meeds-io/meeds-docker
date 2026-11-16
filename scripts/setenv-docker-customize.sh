@@ -132,6 +132,9 @@ esac
 
 [ -z "${MEEDS_ACCESS_LOG_ENABLED}" ] && MEEDS_ACCESS_LOG_ENABLED="false"
 
+# Loading page served on the HTTP port while the platform starts (the platform reads EXO_LOADING_PAGE, enabled by default)
+[ -n "${MEEDS_LOADING_PAGE}" ] && EXO_LOADING_PAGE="${MEEDS_LOADING_PAGE}"
+
 [ -z "${MEEDS_ES_TIMEOUT}" ] && MEEDS_ES_TIMEOUT="60"
 [ -z "${MEEDS_ES_SCHEME}" ] && MEEDS_ES_SCHEME="http"
 [ -z "${MEEDS_ES_HOST}" ] && MEEDS_ES_HOST="localhost"
