@@ -26,7 +26,7 @@
 #           docker run -d --rm -p 8080:8080 -v meeds_data:/srv/meeds meeds-io/meeds
 #           docker run -d -p 8080:8080 -v $(pwd)/setenv-customize.sh:/opt/meeds/bin/setenv-customize.sh:ro meeds-io/meeds
 
-FROM  exoplatform/jdk:openjdk-21-ubuntu-2604
+FROM  exoplatform/jdk:openjdk-25-ubuntu-2604
 
 LABEL org.opencontainers.image.authors="Meeds <docker@exoplatform.com>" \
       org.opencontainers.image.title="Meeds" \
